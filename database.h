@@ -19,7 +19,7 @@ class Database
     string dropAccount= "DROP TABLE IF EXISTS ACCOUNT CASCADE;";
 
     string createTableAccount = "CREATE TABLE ACCOUNT ("
-                          "ACCOUNT_ID      TEXT    PRIMARY KEY NOT NULL, "
+                          "ACCOUNT_ID      INT    PRIMARY KEY NOT NULL, "
                           "BALANCE         REAL    NOT NULL);";
     string dropPosition = "DROP TABLE IF EXISTS POSITION CASCADE;";
 

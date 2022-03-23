@@ -2,6 +2,14 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 using namespace std;
+
+XMLDocument *convertToXML(string xml){
+    XMLDocument *doc = new XMLDocument();
+    doc->Parse(xml.c_str());
+    return doc;
+
+}
+
 void handleRequest(int client_fd){
     pqxx::connection *C;
     try {
@@ -24,9 +32,9 @@ void handleRequest(int client_fd){
     return;
     }
     // loop and dispatch
-  char buffer[40960];
-
-  string response;
+    char buffer[40960];
+    XMLDocument *response = new XMLDocument();//Q
+    //string response;
 
   // Reset buffer
   memset(buffer, '\0', sizeof(buffer));
@@ -38,4 +46,52 @@ void handleRequest(int client_fd){
 
   string xml(buffer);
   //conver stringxml to a XMLDocument object
+  /*XMLDocument *doc = new XMLDocument();
+  doc->Parse(xml.c_str());*/
+  if (xml.find("<create>") != std::string::npos){
+      response = handleCreat(C,xml);//Q
+  }else if (xml.find("<transactions") != std::string::npos){
+      response = handleTranscation(C,xml,response);
+  }
+
+}
+
+
+XMLDocument* handleCreat(connection *C, string request){
+    XMLDocument* response = new XMLDocument();
+
+    XMLDocument *xml = new XMLDocument();//Q
+    xml->Parse(request.c_str());
+
+    XMLElement* root = response->NewElement("results");
+    response->InsertEndChild(root);
+
+    XMLElement* xml_root  =xml->RootElement();
+    XMLElement* currElem = xml_root->FirstChildElement();
+    while(currElem != NULL){
+        if(strncmp(currElem->Name(),"account",7) == 0){
+            int id = currElem->FirstAttribute()->IntValue();
+            double balance = currElem->FindAttribute("balance")->DoubleValue();
+            string id = to_string(id);
+            if(balance <= 0 || Account::idExists(C,id) == true){
+                //写error
+            }else{//创建一个account
+                Account::addAccount(C,id,balance);
+            }
+            XMLElement* usernode = response->NewElement("created");
+            string id = to_string(id);
+            usernode->SetAttribute("id", id);
+            root->InsertEndChild(usernode);
+            
+        }else if(strncmp(currElem->Name(),"symbol",6) == 0){
+
+        }
+        currElem = currElem->NextSiblingElement();
+    }
+    return response;
+
+}
+
+XMLDocument* handleTranscation(connection *C, string request,XMLDocument response){
+    
 }
