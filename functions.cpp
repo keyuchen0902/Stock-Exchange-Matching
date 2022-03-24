@@ -56,6 +56,9 @@ void handleRequest(int client_fd){
 
 }
 
+bool checkAlpha(string sym){
+
+}
 
 XMLDocument* handleCreat(connection *C, string request){
     XMLDocument* response = new XMLDocument();
@@ -74,20 +77,47 @@ XMLDocument* handleCreat(connection *C, string request){
             double balance = currElem->FindAttribute("balance")->DoubleValue();
             string id = to_string(id);
             if(balance <= 0 || Account::idExists(C,id) == true){
-                //写error
+                //写error 是否要直接return
+                XMLElement* usernode = response->NewElement("error");
+                usernode->SetAttribute("id", id);
+                usernode->InsertFirstChild(response->NewText("balance is wrong or account id has existed"));
+                root->InsertEndChild(usernode);
+                return response;
             }else{//创建一个account
                 Account::addAccount(C,id,balance);
+                XMLElement* usernode = response->NewElement("created");
+                usernode->SetAttribute("id", id);
+                root->InsertEndChild(usernode);
             }
-            XMLElement* usernode = response->NewElement("created");
-            string id = to_string(id);
-            usernode->SetAttribute("id", id);
-            root->InsertEndChild(usernode);
-            
         }else if(strncmp(currElem->Name(),"symbol",6) == 0){
+             //to do
+            string sym = currElem->FirstAttribute()->Value();
+            XMLElement *currAccount = currElem->FirstChildElement();
+            while(currAccount != NULL){
+                int id = currAccount->FirstAttribute()->IntValue();
+                int amount = atoi(currAccount->GetText());//Q 检查text是否是数字
+                currAccount = currAccount->NextSiblingElement();
+                if(!checkAlpha(sym)|| amount <0 || Account::idExists(C,id) == false){
+                    XMLElement* usernode = response->NewElement("error");
+                    usernode->SetAttribute("sym",sym);//Q 加两个对象
+                    usernode->SetAttribute("id", id);
+                    usernode->InsertFirstChild(response->NewText("symbol format is wrong or account id has not existed or the num of share is negative"));
+                    root->InsertEndChild(usernode);
+                    return response;
+                }else{
+                    Position::addPosition(C,sym,id,amount);
+                    string id = to_string(id);
+                    XMLElement* usernode = response->NewElement("created");
+                    usernode->SetAttribute("sym", sym);
+                    usernode->SetAttribute("id",id);
+                    root->InsertEndChild(usernode);
 
+                }
+            }
         }
         currElem = currElem->NextSiblingElement();
     }
+    //是否要save 怎么save
     return response;
 
 }
