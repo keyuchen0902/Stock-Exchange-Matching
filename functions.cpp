@@ -1,14 +1,13 @@
 #include "functions.h"
-#include "tinyxml2.h"
-using namespace tinyxml2;
-using namespace std;
 
+
+/*
 XMLDocument *convertToXML(string xml){
     XMLDocument *doc = new XMLDocument();
     doc->Parse(xml.c_str());
     return doc;
 
-}
+}*/
 
 void handleRequest(int client_fd){
     pqxx::connection *C;
@@ -51,13 +50,23 @@ void handleRequest(int client_fd){
   if (xml.find("<create>") != std::string::npos){
       response = handleCreat(C,xml);//Q
   }else if (xml.find("<transactions") != std::string::npos){
-      response = handleTranscation(C,xml,response);
+      //response = handleTranscation(C,xml,response);
   }
 
 }
 
 bool checkAlpha(string sym){
+    if (sym.empty()) {
+    return false;
+    }
 
+  for (std::string::const_iterator it = sym.begin(); it != sym.end(); ++it) {
+    if (!std::isalpha(*it) && !std::isdigit(*it)) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 XMLDocument* handleCreat(connection *C, string request){
@@ -81,6 +90,12 @@ XMLDocument* handleCreat(connection *C, string request){
                 usernode->SetAttribute("id", id);
                 usernode->InsertFirstChild(response->NewText("balance is wrong or account id has existed"));
                 root->InsertEndChild(usernode);
+                response->SaveFile("test.xml");
+                // XML 写到字符串
+                XMLPrinter printer;
+                response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
+                string buf = printer.CStr(); //转换成const char*类型
+                cout << buf << endl;         // buf即为创建后的XML 字符串。
                 return response;
             }else{//创建一个account
                 Account::addAccount(C,id,balance);
@@ -102,6 +117,13 @@ XMLDocument* handleCreat(connection *C, string request){
                     usernode->SetAttribute("id", id);
                     usernode->InsertFirstChild(response->NewText("symbol format is wrong or account id has not existed or the num of share is negative"));
                     root->InsertEndChild(usernode);
+                     response->SaveFile("test.xml");
+                    // XML 写到字符串
+                    XMLPrinter printer;
+                    response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
+                    string buf = printer.CStr(); //转换成const char*类型
+                    cout << buf << endl;         // buf即为创建后的XML 字符串。
+
                     return response;
                 }else{
                     Position::addPosition(C,sym,id,amount);
@@ -116,6 +138,12 @@ XMLDocument* handleCreat(connection *C, string request){
         currElem = currElem->NextSiblingElement();
     }
     //是否要save 怎么save 似乎需要一个文件路径
+     response->SaveFile("test.xml");
+    // XML 写到字符串
+    XMLPrinter printer;
+    response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
+    string buf = printer.CStr(); //转换成const char*类型
+    cout << buf << endl;         // buf即为创建后的XML 字符串。
     return response;
 
 }

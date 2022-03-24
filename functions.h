@@ -18,7 +18,11 @@
 #include "account.h"
 #include "position.h"
 
-
+#include "tinyxml2.h"
+using namespace tinyxml2;
+using namespace std;
 
 void handleRequest(int client_fd);  // parse
+XMLDocument* handleCreat(connection *C, string request);
+XMLDocument* handleTranscation(connection *C, string request,XMLDocument response)
 #endif

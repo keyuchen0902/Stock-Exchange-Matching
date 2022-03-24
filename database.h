@@ -25,7 +25,7 @@ class Database
 
     string createTablePosition = "CREATE TABLE POSITION ("
                           "SYMBOL_NAME     TEXT    NOT NULL, "
-                          "ACCOUNT_ID      TEXT    NOT NULL, "
+                          "ACCOUNT_ID      INT    NOT NULL, "
                           "NUM_SHARE       INT     NOT NULL, "
                           "CONSTRAINT POSITION_PKEY PRIMARY KEY (SYMBOL_NAME, ACCOUNT_ID));";
     
@@ -33,7 +33,7 @@ class Database
 
     string createTableTranscation = "CREATE TABLE TRANSACTION ("
                           "TRANSACTION_ID  SERIAL  PRIMARY KEY NOT NULL, "
-                          "ACCOUNT_ID      TEXT    NOT NULL, "
+                          "ACCOUNT_ID      INT    NOT NULL, "
                           "SYMBOL_NAME     TEXT    NOT NULL, "
                           "LIMITED         REAL    NOT NULL, "
                           "NUM_OPEN        INT     NOT NULL, "
