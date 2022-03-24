@@ -7,7 +7,7 @@
 using namespace std;
 
 /* Add a new entry to the table, return true if succeed */
-bool Account::addAccount(connection * C, int account_id, double balance) {
+bool Account::addAccount(connection * C, string account_id, double balance) {
   /* Create a transactional object. */
   work W(*C);
 
@@ -32,7 +32,7 @@ bool Account::addAccount(connection * C, int account_id, double balance) {
 }
 
 /* Check if the given account already exists */
-bool Account::idExists(connection * C,int account_id) {
+bool Account::idExists(connection * C,string account_id) {
   /* Create a non-transactional object. */
   nontransaction N(*C);
 
@@ -45,4 +45,33 @@ bool Account::idExists(connection * C,int account_id) {
   result R(N.exec(sql.str()));
 
   return R.size() != 0;
+}
+
+bool Account::enoughBalance(connection *C,string account_id, double requiredBalance){
+    work W(*C);
+
+    std::stringstream sql1;
+    sql1 << "SELECT BALANCE FROM ACCOUNT WHERE ACCOUNT_ID=";
+    sql1 << W.quote(account_id) << " FOR UPDATE;";
+
+    result R(W.exec(sql1.str()));
+
+    double amount = R[0]["BALANCE"].as<double>();
+    double remain = amount - requiredBalance;
+    if (remain < 0) {
+      W.commit();
+      return false;
+    }
+
+    std::stringstream sql2;
+    sql2 << "UPDATE ACCOUNT SET BALANCE = ";
+    sql2 << W.quote(remain) << " ";
+    sql2 << "WHERE ACCOUNT_ID=";
+    sql2 << W.quote(account_id) << ";";
+
+    /* Execute SQL query */
+    W.exec(sql2.str());
+    W.commit();
+
+    return true;
 }

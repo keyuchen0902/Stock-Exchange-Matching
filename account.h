@@ -19,9 +19,11 @@ class Account
 
  public:
   /* Add a new entry to the table, return true if succeed */
-  static bool addAccount(connection * C, int account_id, double balance);
+  static bool addAccount(connection * C, string account_id, double balance);
 
   /* Check if the given account already exists */
-  static bool idExists(connection * C, int account_id);
+  static bool idExists(connection * C, string account_id);
+
+  static bool enoughBalance(connection *C,string account_id, double requiredBalance);
 };
 

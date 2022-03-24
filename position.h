@@ -24,7 +24,10 @@ class Position
   /* Add a new entry to the table */
   static void addPosition(connection * C,
                           const string & symbol_name,
-                          int account_id,
+                          string account_id,
                           int num_share);
+    static bool updateSymbolAmount(connection * C,string symbol_name,string account_id,int amount);
 };
+
+  
 #endif

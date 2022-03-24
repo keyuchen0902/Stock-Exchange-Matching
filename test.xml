@@ -1,4 +1,4 @@
 <results>
     <created id="777"/>
-    <error sym="X" id="888">symbol format is wrong or account id has not existed or the num of share is negative</error>
+    <created sym="X" id="777"/>
 </results>

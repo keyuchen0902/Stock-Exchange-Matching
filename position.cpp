@@ -9,7 +9,7 @@ using namespace std;
 /* Add a new entry to the table */
 void Position::addPosition(connection * C,
                            const string & symbol_name,
-                           int account_id,
+                           string account_id,
                            int num_share) {
   /* Create a transactional object. */
   work W(*C);
@@ -28,4 +28,41 @@ void Position::addPosition(connection * C,
 
   W.exec(sql.str());
   W.commit();
+}
+
+bool Position::updateSymbolAmount(connection * C,string symbol_name,string account_id,int amount){
+    work W(*C);
+
+    // Read
+    std::stringstream sql1;
+    sql1 << "SELECT NUM_SHARE FROM POSITION WHERE ACCOUNT_ID = ";
+    sql1 << W.quote(account_id) << " ";
+    sql1 << "AND SYMBOL_NAME = " << W.quote(symbol_name) << " FOR UPDATE;";
+
+    result R(W.exec(sql1.str()));
+    if (R.size() == 0) {
+      return false;
+    }
+
+    // Modify
+    int num_share = R[0]["NUM_SHARE"].as<int>();
+    int remain = num_share - amount;
+
+    if (remain < 0) {
+      W.commit();
+      return false;
+    }
+
+    // Write
+    std::stringstream sql2;
+    sql2 << "UPDATE POSITION SET NUM_SHARE = ";
+    sql2 << W.quote(remain) << " ";
+    sql2 << "WHERE ACCOUNT_ID = ";
+    sql2 << W.quote(account_id) << " ";
+    sql2 << "AND SYMBOL_NAME = " << W.quote(symbol_name) << ";";
+
+    W.exec(sql2.str());
+    W.commit();
+
+    return true;
 }

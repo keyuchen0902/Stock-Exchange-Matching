@@ -19,13 +19,13 @@ class Database
     string dropAccount= "DROP TABLE IF EXISTS ACCOUNT CASCADE;";
 
     string createTableAccount = "CREATE TABLE ACCOUNT ("
-                          "ACCOUNT_ID      INT    PRIMARY KEY NOT NULL, "
+                          "ACCOUNT_ID      TEXT    PRIMARY KEY NOT NULL, "
                           "BALANCE         REAL    NOT NULL);";
     string dropPosition = "DROP TABLE IF EXISTS POSITION CASCADE;";
 
     string createTablePosition = "CREATE TABLE POSITION ("
                           "SYMBOL_NAME     TEXT    NOT NULL, "
-                          "ACCOUNT_ID      INT    NOT NULL, "
+                          "ACCOUNT_ID      TEXT    NOT NULL, "
                           "NUM_SHARE       INT     NOT NULL, "
                           "CONSTRAINT POSITION_PKEY PRIMARY KEY (SYMBOL_NAME, ACCOUNT_ID));";
     
@@ -33,7 +33,7 @@ class Database
 
     string createTableTranscation = "CREATE TABLE TRANSACTION ("
                           "TRANSACTION_ID  SERIAL  PRIMARY KEY NOT NULL, "
-                          "ACCOUNT_ID      INT    NOT NULL, "
+                          "ACCOUNT_ID      TEXT    NOT NULL, "
                           "SYMBOL_NAME     TEXT    NOT NULL, "
                           "LIMITED         REAL    NOT NULL, "
                           "NUM_OPEN        INT     NOT NULL, "
