@@ -73,9 +73,8 @@ XMLDocument* handleCreat(connection *C, string request){
     XMLElement* currElem = xml_root->FirstChildElement();
     while(currElem != NULL){
         if(strncmp(currElem->Name(),"account",7) == 0){
-            int id = currElem->FirstAttribute()->IntValue();
+            int id = currElem->FirstAttribute()->IntValue();//Q检查id是否为string
             double balance = currElem->FindAttribute("balance")->DoubleValue();
-            string id = to_string(id);
             if(balance <= 0 || Account::idExists(C,id) == true){
                 //写error 是否要直接return
                 XMLElement* usernode = response->NewElement("error");
@@ -99,17 +98,16 @@ XMLDocument* handleCreat(connection *C, string request){
                 currAccount = currAccount->NextSiblingElement();
                 if(!checkAlpha(sym)|| amount <0 || Account::idExists(C,id) == false){
                     XMLElement* usernode = response->NewElement("error");
-                    usernode->SetAttribute("sym",sym);//Q 加两个对象
+                    usernode->SetAttribute("sym",sym.c_str());//Q 加两个对象
                     usernode->SetAttribute("id", id);
                     usernode->InsertFirstChild(response->NewText("symbol format is wrong or account id has not existed or the num of share is negative"));
                     root->InsertEndChild(usernode);
                     return response;
                 }else{
                     Position::addPosition(C,sym,id,amount);
-                    string id = to_string(id);
                     XMLElement* usernode = response->NewElement("created");
-                    usernode->SetAttribute("sym", sym);
-                    usernode->SetAttribute("id",id);
+                    usernode->SetAttribute("sym",sym.c_str());
+                    usernode->SetAttribute("id", id);
                     root->InsertEndChild(usernode);
 
                 }
@@ -117,7 +115,7 @@ XMLDocument* handleCreat(connection *C, string request){
         }
         currElem = currElem->NextSiblingElement();
     }
-    //是否要save 怎么save
+    //是否要save 怎么save 似乎需要一个文件路径
     return response;
 
 }
