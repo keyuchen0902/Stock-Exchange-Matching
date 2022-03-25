@@ -1,13 +1,8 @@
 <create>
-  <account id="abc" balance="10000000000"/>
-  <account id="333" balance="-10000000000"/>
-  <account id="666" balance="10000000000"/>
-  <account id="222" balance="10000000000"/>
-  <account id="444" balance="10000000000"/>
-  <account id="555" balance="10000000000"/>
+  <account id="666" balance="500"/>
+  <account id="777" balance="500"/>
   <symbol sym="X">
-    <account id="222">500</account>
-    <account id="444">500</account>
-    <account id="555">500</account>
+    <account id="666">200</account>
+    <account id="777">200</account>
   </symbol>
 </create>

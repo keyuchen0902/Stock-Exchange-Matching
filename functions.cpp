@@ -81,6 +81,22 @@ bool checkDigits(string id){
   return true;
 }
 
+void getAccountError(XMLDocument* response,XMLElement* root,string id,string msg){
+    XMLElement* usernode = response->NewElement("error");
+    usernode->SetAttribute("id", id.c_str());
+    usernode->InsertFirstChild(response->NewText(msg.c_str()));
+    root->InsertEndChild(usernode);
+}
+
+void getSymbolError(XMLDocument* response,XMLElement* root,string sym,string id,string msg){
+    XMLElement* usernode = response->NewElement("error");
+    usernode->SetAttribute("sym",sym.c_str());//Q 加两个对象
+    usernode->SetAttribute("id", id.c_str());
+    usernode->InsertFirstChild(response->NewText(msg.c_str()));
+    root->InsertEndChild(usernode);
+}
+
+
 XMLDocument* handleCreat(connection *C, string request){
     XMLDocument* response = new XMLDocument();
 
@@ -96,20 +112,16 @@ XMLDocument* handleCreat(connection *C, string request){
         if(strncmp(currElem->Name(),"account",7) == 0){
             string id = currElem->FirstAttribute()->Value();//Q检查id是否为string
             double balance = currElem->FindAttribute("balance")->DoubleValue();
-            if(balance <= 0 || Account::idExists(C,id) == true || checkDigits(id) == false){
+
+            if(Account::idExists(C,id) == true || checkDigits(id) == false){
                 //写error 是否要直接return
-                XMLElement* usernode = response->NewElement("error");
-                usernode->SetAttribute("id", id.c_str());
-                usernode->InsertFirstChild(response->NewText("id is not digits or balance is wrong or account id has existed"));
-                root->InsertEndChild(usernode);
-                /*response->SaveFile("test.xml");
-                // XML 写到字符串
-                XMLPrinter printer;
-                response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
-                string buf = printer.CStr(); //转换成const char*类型
-                cout << buf << endl;         // buf即为创建后的XML 字符串。
-                return response;*/
-            }else{//创建一个account
+                getAccountError(response,root,id,"account id doesn't exist");
+            }else if(balance <= 0){
+                getAccountError(response,root,id,"balance is not positive");
+            }else if(checkDigits(id) == false){
+                getAccountError(response,root,id,"account id's format is wrong");
+            }
+            else{//创建一个account
                 Account::addAccount(C,id,balance);
                 XMLElement* usernode = response->NewElement("created");
                 usernode->SetAttribute("id", id.c_str());
@@ -123,27 +135,21 @@ XMLDocument* handleCreat(connection *C, string request){
                 string id = currAccount->FirstAttribute()->Value();
                 int amount = stoi(currAccount->GetText());//Q 检查text是否是数字
                 currAccount = currAccount->NextSiblingElement();
-                if(!checkAlpha(sym)|| amount <0 || Account::idExists(C,id) == false || checkDigits(id) == false){
-                    XMLElement* usernode = response->NewElement("error");
-                    usernode->SetAttribute("sym",sym.c_str());//Q 加两个对象
-                    usernode->SetAttribute("id", id.c_str());
-                    usernode->InsertFirstChild(response->NewText("symbol or id format is wrong or account id has not existed or the num of share is negative"));
-                    root->InsertEndChild(usernode);
-                    /*response->SaveFile("test.xml");
-                    // XML 写到字符串
-                    XMLPrinter printer;
-                    response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
-                    string buf = printer.CStr(); //转换成const char*类型
-                    cout << buf << endl;         // buf即为创建后的XML 字符串。
-
-                    return response;*/
-                }else{
+                if(!checkAlpha(sym)){
+                    getSymbolError(response,root,sym,id,"sym format is wrong");
+                }else if(amount <0){
+                    getSymbolError(response,root,sym,id,"amount is non-zero");
+                }else if(Account::idExists(C,id) == false){
+                    getSymbolError(response,root,sym,id,"account id doesn't exist");
+                }else if(checkDigits(id) == false){
+                    getSymbolError(response,root,sym,id,"id format is wrong");
+                }
+                else{
                     Position::addPosition(C,sym,id,amount);
                     XMLElement* usernode = response->NewElement("created");
                     usernode->SetAttribute("sym",sym.c_str());
                     usernode->SetAttribute("id", id.c_str());
                     root->InsertEndChild(usernode);
-
                 }
             }
         }
@@ -159,6 +165,14 @@ XMLDocument* handleCreat(connection *C, string request){
     return response;
 
 }
+void getTransError(XMLDocument* response,XMLElement* root,string sym,string amount, string limit,string msg){
+    XMLElement* usernode = response->NewElement("error");
+    usernode->SetAttribute("sym", sym.c_str());
+    usernode->SetAttribute("amount", amount.c_str());
+    usernode->SetAttribute("limit", limit.c_str());
+    usernode->InsertFirstChild(response->NewText(msg.c_str()));
+    root->InsertEndChild(usernode);
+}
 
 XMLDocument* handleTranscation(connection *C, string request){
     XMLDocument* response = new XMLDocument();
@@ -172,11 +186,16 @@ XMLDocument* handleTranscation(connection *C, string request){
     XMLElement* xml_root  =xml->RootElement();
     string id = xml_root->FindAttribute("id")->Value();
     if(Account::idExists(C,id) ==false || !checkDigits(id)){
-        //写error 是否要直接return
-        XMLElement* usernode = response->NewElement("error");
-        usernode->SetAttribute("id", id.c_str());
-        usernode->InsertFirstChild(response->NewText("account id has not existed or id format wrong"));
-        root->InsertEndChild(usernode);
+        getAccountError(response,root,id,"account id doesn't exist");
+        response->SaveFile("test1.xml");
+        // XML 写到字符串
+        XMLPrinter printer;
+        response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
+        string buf = printer.CStr(); //转换成const char*类型
+        cout << buf << endl;         // buf即为创建后的XML 字符串。
+        return response;
+    }else if(!checkDigits(id)){
+        getAccountError(response,root,id,"id format is wrong");
         response->SaveFile("test1.xml");
         // XML 写到字符串
         XMLPrinter printer;
@@ -186,77 +205,61 @@ XMLDocument* handleTranscation(connection *C, string request){
         return response;
     }
     XMLElement* currElem = xml_root->FirstChildElement();
+    
     while(currElem != NULL){
         if(strncmp(currElem->Name(),"order",5) == 0){
             string sym = currElem->FirstAttribute()->Value();
             string amount = currElem->FindAttribute("amount")->Value();
             string limit = currElem->FindAttribute("limit")->Value();
-            if(!checkAlpha(sym)|| stoi(amount) == 0 || stod(limit) < 0){
-                cout << stoi(amount) <<endl;
-                cout << stod(limit) <<endl;
-                XMLElement* usernode = response->NewElement("error");
-                usernode->SetAttribute("sym", sym.c_str());
+            if(!checkAlpha(sym)){
+                getTransError(response,root,sym,amount,limit,"symblo format is wrong");
+            }else if(stoi(amount) == 0){
+                getTransError(response,root,sym,amount,limit,"amount should be non-zero");
+            }else if(stod(limit) < 0){
+                getTransError(response,root,sym,amount,limit,"limit should be positive");
+            }else{
+                if(stoi(amount) > 0){//检查账户余额是否充足，并更新账户余额 买
+                    double requiredBalance = stoi(amount)*stod(limit);
+                    if(!Account::enoughBalance(C,id,requiredBalance)){
+                        getTransError(response,root,sym,amount,limit,"account balance is not enough");
+                        currElem = currElem->NextSiblingElement();
+                        continue;
+                    }
+                }else if(stoi(amount) < 0){//amount<0 means sell 检查symbol的amount是否足够并更新
+                    if(!Position::updateSymbolAmount(C,sym,id,0-stoi(amount))){
+                        getTransError(response,root,sym,amount,limit,"symbol amount is not enough");
+                        currElem = currElem->NextSiblingElement();
+                        continue;
+                    }
+                }  
+                //now creat a transaction
+                int id_trans = Transaction::addTransaction(C,id,sym,stod(limit),stoi(amount));
+                //Match one possible at a time ??
+                XMLElement* usernode = response->NewElement("opened");
+                usernode->SetAttribute("sym",sym.c_str());
                 usernode->SetAttribute("amount", amount.c_str());
                 usernode->SetAttribute("limit", limit.c_str());
-                usernode->InsertFirstChild(response->NewText("sym or amount or limit format wrong"));
-                root->InsertEndChild(usernode);
-                response->SaveFile("test.xml");
-                // XML 写到字符串
-                XMLPrinter printer;
-                response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
-                string buf = printer.CStr(); //转换成const char*类型
-                cout << buf << endl;         // buf即为创建后的XML 字符串。
-                return response;
-            }
-            if(stoi(amount) > 0){//检查账户余额是否充足，并更新账户余额
-                double requiredBalance = stoi(amount)*stod(limit);
-                
-                if(!Account::enoughBalance(C,id,requiredBalance)){
-                    XMLElement* usernode = response->NewElement("error");
-                    usernode->SetAttribute("sym", sym.c_str());
-                    usernode->SetAttribute("amount", amount.c_str());
-                    usernode->SetAttribute("limit", limit.c_str());
-                    usernode->InsertFirstChild(response->NewText("account balance is not enough"));
-                    root->InsertEndChild(usernode);
-                    response->SaveFile("test.xml");
-                    XMLPrinter printer;
-                    response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
-                    string buf = printer.CStr(); //转换成const char*类型
-                    cout << buf << endl;         // buf即为创建后的XML 字符串。
-                    return response;
-                }
-            }else{//amount<0 means sell 检查symbol的amount是否足够
-                if(!Position::updateSymbolAmount(C,sym,id,0-stoi(amount))){
-                    XMLElement* usernode = response->NewElement("error");
-                    usernode->SetAttribute("sym", sym.c_str());
-                    usernode->SetAttribute("amount", amount.c_str());
-                    usernode->SetAttribute("limit", limit.c_str());
-                    usernode->InsertFirstChild(response->NewText("symbol amount is not enough"));
-                    root->InsertEndChild(usernode);
-                    response->SaveFile("test.xml");
-                    XMLPrinter printer;
-                    response->Print(&printer);         //将Print打印到Xmlprint类中 即保存在内存中
-                    string buf = printer.CStr(); //转换成const char*类型
-                    cout << buf << endl;         // buf即为创建后的XML 字符串。
-                    return response;
-                }
-            }
-            //now creat a transaction
-            int id_trans = Transaction::addTransaction(C,id,sym,stod(limit),stoi(amount));
-            //Match one possible at a time ??
-            XMLElement* usernode = response->NewElement("opened");
-            usernode->SetAttribute("sym",sym.c_str());
-            usernode->SetAttribute("amount", amount.c_str());
-            usernode->SetAttribute("limit", limit.c_str());
-            usernode->SetAttribute("id", id_trans);
-            root->InsertEndChild(usernode);
+                usernode->SetAttribute("id", id_trans);
+                root->InsertEndChild(usernode);   
+            } 
         }
         /*if(strncmp(currElem->Name(),"cancel",6) == 0){
 
-        }
-        if(strncmp(currElem->Name(),"query",5) == 0){
-
         }*/
+        else if(strcmp(currElem->Name(),"query") == 0){
+        
+            string trans_id = currElem->FindAttribute("id")->Value();
+            if(!checkDigits(trans_id)){
+                getAccountError(response,root,id,"transcation id format is wrong");
+            }else if(!Transaction::isTransExists(C,stoi(trans_id))){
+                getAccountError(response,root,id,"transcation id does not exist");
+            }else{
+                XMLElement* usernode = response->NewElement("status");
+                usernode->SetAttribute("id",trans_id.c_str());
+                Transaction::handleQuery(C,stoi(trans_id),response,usernode);//Q内存问题 对response进行修改
+                root->InsertEndChild(usernode);
+            }
+        }
         currElem = currElem->NextSiblingElement();
     }
     response->SaveFile("test2.xml");

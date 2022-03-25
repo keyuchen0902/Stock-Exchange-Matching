@@ -1,3 +1,4 @@
-<transactions id="777">
-  <order sym="X" amount="200" limit="1.5"/>
+<transactions id="666">
+  <order sym="X" amount="100" limit="1.5"/>
+  <query id="1"/>
 </transactions>

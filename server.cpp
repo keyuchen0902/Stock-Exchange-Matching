@@ -89,21 +89,21 @@ int main(int argc, char ** argv) {
     socklen_t socket_addr_len = sizeof(socket_addr);
 
     // Accept request
-    int reqfd = accept(sockfd, (struct sockaddr *)&socket_addr, &socket_addr_len);
-    if (reqfd < 0) {
+    int client_fd = accept(sockfd, (struct sockaddr *)&socket_addr, &socket_addr_len);
+    if (client_fd< 0) {
       std::cout << "Error in accept" << std::endl;
       std::cout << errno << std::endl;
       exit(1);
     }
 
     try {
-      handleRequest(reqfd);
+      handleRequest(client_fd);
     }
     catch (std::exception & e) {
       // General catch exception to return 404, rarely gets here though
       // Because we have other try & catch in handlehttp
       std::cout << e.what() << std::endl;
-      close(reqfd);
+      close(client_fd);
     }
   }
 

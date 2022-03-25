@@ -1,3 +1,6 @@
 <results>
-    <opened sym="X" amount="200" limit="1.5" id="1"/>
+    <opened sym="X" amount="100" limit="1.5" id="1"/>
+    <status id="1">
+        <open shares="100"/>
+    </status>
 </results>

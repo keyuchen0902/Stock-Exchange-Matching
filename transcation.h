@@ -6,9 +6,11 @@
 
 #include "functions.h"
 #include "database.h"
+#include "tinyxml2.h"
 
 using std::string;
 using namespace pqxx;
+using namespace tinyxml2;
 
 class Transaction
 {
@@ -23,5 +25,8 @@ class Transaction
   /* Try to match a transaction,
      return true if another matching can still be achieved */
   //static bool tryMatch(connection * C, int trans_id);
+  static bool isTransExists(connection * C, int trans_id);
+  static void handleQuery(connection *C,int trans_id,XMLDocument* response,XMLElement* usernode);
+
 };
 #endif

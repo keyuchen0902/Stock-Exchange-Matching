@@ -1,4 +1,6 @@
 <results>
+    <created id="666"/>
     <created id="777"/>
+    <created sym="X" id="666"/>
     <created sym="X" id="777"/>
 </results>
