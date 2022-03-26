@@ -25,8 +25,10 @@ class Transaction
   /* Try to match a transaction,
      return true if another matching can still be achieved */
   //static bool tryMatch(connection * C, int trans_id);
-  static bool isTransExists(connection * C, int trans_id);
-  static void handleQuery(connection *C,int trans_id,XMLDocument* response,XMLElement* usernode);
-
-};
+   static bool isTransExists(connection * C, int trans_id);
+   static void handleQuery(connection *C,int trans_id,XMLDocument* response,XMLElement* usernode);
+   static void handleCancel(connection *C,int trans_id,XMLDocument* response,XMLElement* usernode);
+   static double getLimited(connection * C, int trans_id);
+   static long getCanceledTime(connection * C, int trans_id);
+}; 
 #endif
