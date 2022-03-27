@@ -18,6 +18,7 @@
 #include "account.h"
 #include "position.h"
 #include "transcation.h"
+#include "execution.h"
 
 #include "tinyxml2.h"
 using namespace tinyxml2;

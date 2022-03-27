@@ -291,6 +291,9 @@ XMLDocument *handleTranscation(connection *C, string request)
                 // now creat a transaction
                 int id_trans = Transaction::addTransaction(C, id, sym, stod(limit), stoi(amount));
                 // Match one possible at a time ??
+                while(Transaction::matchOrder(C,id_trans)){
+                    cout<<"enter here"<<endl;
+                }
                 XMLElement *usernode = response->NewElement("opened");
                 usernode->SetAttribute("sym", sym.c_str());
                 usernode->SetAttribute("amount", amount.c_str());
@@ -334,7 +337,7 @@ XMLDocument *handleTranscation(connection *C, string request)
             {
                 XMLElement *usernode = response->NewElement("status");
                 usernode->SetAttribute("id", trans_id.c_str());
-                Transaction::handleQuery(C, stoi(trans_id), response, usernode); // Q内存问题 对response进行修改
+                Transaction::handleQuery(C, stoi(trans_id), response, usernode); 
                 root->InsertEndChild(usernode);
             }
         }

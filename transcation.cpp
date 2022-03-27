@@ -124,7 +124,7 @@ void Transaction::handleQuery(connection *C, int trans_id, XMLDocument *response
                      node3->SetAttribute("shares", 0 - c["AMOUNT"].as<int>());
               }
               node3->SetAttribute("price", c["PRICE"].as<double>());
-              node3->SetAttribute("price", c["TIME"].as<long>());
+              node3->SetAttribute("time", c["TIME"].as<long>());
               usernode->InsertEndChild(node3);
        }
 
@@ -167,7 +167,7 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
        {
               W1.commit();
               XMLElement *node1 = response->NewElement("error");
-              string msg = "the num of open shsare is 0. Cannot be canceled";
+              string msg = "the num of open share is 0. Cannot be canceled";
               node1->InsertFirstChild(response->NewText(msg.c_str()));
               usernode->InsertEndChild(node1);
               flag = false;
@@ -177,7 +177,7 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
               /* Create SQL statement */
               std::stringstream sql2;
               sql2 << "UPDATE TRANSACTION SET ";
-              sql2 << "NUM_CANCEL = TRANSACTION.NUM_OPEN, ";
+              sql2 << "NUM_CANCELED = TRANSACTION.NUM_OPEN, ";
               sql2 << "NUM_OPEN = 0, ";
               sql2 << "CANCEL_TIME = " << W1.quote(getCurrTime()) << ";";
 
@@ -280,4 +280,213 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
                      usernode->InsertEndChild(node2);
               }
        }
+}
+
+bool Transaction::matchOrder(connection *C, int trans_id)
+{
+       /* Create a non-transactional object. */
+       
+       work W(*C);
+
+       // Lock all rows related to current transaction's owner
+       std::stringstream ownerSql;
+       ownerSql << "SELECT * FROM ACCOUNT, POSITION, TRANSACTION WHERE ";
+       ownerSql << "TRANSACTION.TRANSACTION_ID = " << W.quote(trans_id) << " ";
+       ownerSql << "AND ACCOUNT.ACCOUNT_ID = TRANSACTION.ACCOUNT_ID ";
+       ownerSql << "AND POSITION.ACCOUNT_ID = TRANSACTION.ACCOUNT_ID ";
+       ownerSql << "AND POSITION.SYMBOL_NAME = TRANSACTION.SYMBOL_NAME ";
+       ownerSql << "FOR UPDATE;"; // lock
+
+       W.exec(ownerSql.str());
+       // get info of trans_id
+       std::stringstream getinfo;
+       getinfo << "SELECT * FROM TRANSACTION WHERE TRANSACTION_ID = ";
+       getinfo << W.quote(trans_id) << ";";
+
+       result R1(W.exec(getinfo.str()));
+
+       string account_id = R1[0]["ACCOUNT_ID"].as<string>();
+       string symbol_name = R1[0]["SYMBOL_NAME"].as<string>();
+       double limited = R1[0]["LIMITED"].as<double>();
+       int num_open = R1[0]["NUM_OPEN"].as<int>();
+
+       // Get the first matching transactions,使用lock
+       std::stringstream getTrans;
+       getTrans << "SELECT * FROM TRANSACTION WHERE ACCOUNT_ID != ";
+       getTrans << W.quote(account_id) << " ";
+       getTrans << "AND SYMBOL_NAME = " << W.quote(symbol_name) << " ";
+
+       int final_amount;
+       double final_price;
+
+       if (num_open > 0) //找seller
+       {      
+              cout<<"enter here2"<<endl;
+              getTrans << "AND LIMITED <= " << W.quote(limited) << " ";
+              getTrans << "AND NUM_OPEN < 0 ";
+              getTrans << "ORDER BY LIMITED ASC, OPEN_TIME ASC LIMIT 1 ";
+              getTrans << "FOR UPDATE;";
+       }
+       else
+       {
+              getTrans << "AND LIMITED >= " << W.quote(limited) << " ";
+              getTrans << "AND NUM_OPEN > 0 ";
+              getTrans << "ORDER BY LIMITED DESC, OPEN_TIME ASC LIMIT 1 ";
+              getTrans << "FOR UPDATE;";
+       }
+
+       /* Execute SQL query */
+       result R2(W.exec(getTrans.str()));
+       cout<<R2.size()<<endl;
+       if (R2.size() == 0)
+       {
+              return false;
+       }
+
+       int other_trans_id = R2[0]["TRANSACTION_ID"].as<int>();
+       string other_account_id = R2[0]["ACCOUNT_ID"].as<string>();
+       double other_limited = R2[0]["LIMITED"].as<double>();
+       int other_num_open = R2[0]["NUM_OPEN"].as<int>();
+
+       final_price = other_limited; // Q execution price?
+
+       if (num_open > 0)
+       {
+              if (num_open <= 0 - other_num_open)
+              {
+                     final_amount = num_open;
+                     std::stringstream sql;
+                     sql << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql << W.quote(0) << " ";
+                     sql << "WHERE TRANSACTION_ID = ";
+                     sql << W.quote(trans_id) << ";";
+                     /* Execute SQL query */
+                     W.exec(sql.str());
+                     std::stringstream sql2;
+                     sql2 << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql2 << W.quote(other_num_open + num_open) << " ";
+                     sql2 << "WHERE TRANSACTION_ID = ";
+                     sql2 << W.quote(other_trans_id) << ";";
+                     /* Execute SQL query */
+                     W.exec(sql2.str());
+              }
+              else
+              {
+                     final_amount = 0 - other_num_open;
+                     std::stringstream sql;
+                     sql << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql << W.quote(num_open + other_num_open) << " ";
+                     sql << "WHERE TRANSACTION_ID = ";
+                     sql << W.quote(trans_id) << ";";
+                     /* Execute SQL query */
+                     W.exec(sql.str());
+                     std::stringstream sql2;
+                     sql2 << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql2 << W.quote(0) << " ";
+                     sql2 << "WHERE TRANSACTION_ID = ";
+                     sql2 << W.quote(other_trans_id) << ";";
+                     /* Execute SQL query */
+                     W.exec(sql2.str());
+              }
+              // Return money to buyer
+              std::stringstream sql;
+              sql << "UPDATE ACCOUNT SET BALANCE = ACCOUNT.BALANCE + ";
+              sql << W.quote(final_amount * (limited - other_limited)) << " ";
+              sql << "WHERE ACCOUNT_ID = ";
+              sql << W.quote(account_id) << ";";
+              /* Execute SQL query */
+              W.exec(sql.str());
+
+              // give money to seller
+              std::stringstream sql2;
+              sql2 << "UPDATE ACCOUNT SET BALANCE = ACCOUNT.BALANCE + ";
+              sql2 << W.quote(final_amount * final_price) << " ";
+              sql2 << "WHERE ACCOUNT_ID = ";
+              sql2 << W.quote(other_account_id) << ";";
+              W.exec(sql2.str());
+
+              // give symbol to buyer
+              std::stringstream sql3;
+              sql3 << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
+              sql3 << "VALUES (";
+              sql3 << W.quote(symbol_name) << ", ";
+              sql3 << W.quote(account_id) << ", ";
+              sql3 << W.quote(final_amount) << ") ";
+              sql3 << "ON CONFLICT ON CONSTRAINT POSITION_PKEY ";
+              sql3 << "DO UPDATE SET NUM_SHARE = POSITION.NUM_SHARE + ";
+              sql3 << W.quote(final_amount) << ";";
+
+              W.exec(sql3.str());
+              // Create execution
+              Execution::addExecution(W, trans_id, other_trans_id, final_amount, final_price);
+       }
+       else
+       {
+              if (0 - num_open <= other_num_open)
+              {
+                     final_amount = -num_open;
+                     std::stringstream sql;
+                     sql << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql << W.quote(0) << " ";
+                     sql << "WHERE TRANSACTION_ID = ";
+                     sql << W.quote(trans_id) << ";";
+                     W.exec(sql.str());
+
+                     std::stringstream sql2;
+                     sql2 << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql2 << W.quote(other_num_open + num_open) << " ";
+                     sql2 << "WHERE TRANSACTION_ID = ";
+                     sql2 << W.quote(other_trans_id) << ";";
+                     W.exec(sql2.str());
+              }
+              else
+              {
+                     final_amount = other_num_open;
+                     std::stringstream sql;
+                     sql << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql << W.quote(num_open + other_num_open) << " ";
+                     sql << "WHERE TRANSACTION_ID = ";
+                     sql << W.quote(trans_id) << ";";
+                     W.exec(sql.str());
+
+                     std::stringstream sql2;
+                     sql2 << "UPDATE TRANSACTION SET NUM_OPEN = ";
+                     sql2 << W.quote(0) << " ";
+                     sql2 << "WHERE TRANSACTION_ID = ";
+                     sql2 << W.quote(other_trans_id) << ";";
+                     W.exec(sql2.str());
+              }
+              // give money to seller
+              std::stringstream sql2;
+              sql2 << "UPDATE ACCOUNT SET BALANCE = ACCOUNT.BALANCE + ";
+              sql2 << W.quote(final_amount * final_price) << " ";
+              sql2 << "WHERE ACCOUNT_ID = ";
+              sql2 << W.quote(other_account_id) << ";";
+              W.exec(sql2.str());
+
+              // give symbol to seller
+              std::stringstream sql3;
+              sql3 << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
+              sql3 << "VALUES (";
+              sql3 << W.quote(symbol_name) << ", ";
+              sql3 << W.quote(account_id) << ", ";
+              sql3 << W.quote(final_amount) << ") ";
+              sql3 << "ON CONFLICT ON CONSTRAINT POSITION_PKEY ";
+              sql3 << "DO UPDATE SET NUM_SHARE = POSITION.NUM_SHARE + ";
+              sql3 << W.quote(final_amount) << ";";
+
+              Execution::addExecution(W, other_trans_id, trans_id, final_amount, final_price);
+       }
+       std::stringstream openshare_sql;
+       openshare_sql << "SELECT NUM_OPEN FROM TRANSACTION WHERE TRANSACTION_ID=";
+       openshare_sql << W.quote(trans_id) << ";";
+
+       /* Execute SQL query */
+       result R(W.exec(openshare_sql.str()));
+
+       W.commit();
+       if(R[0][0].as<int>() == 0){//open_num now equals 0
+              return false;
+       }
+       return true;
 }

@@ -30,5 +30,6 @@ class Transaction
    static void handleCancel(connection *C,int trans_id,XMLDocument* response,XMLElement* usernode);
    static double getLimited(connection * C, int trans_id);
    static long getCanceledTime(connection * C, int trans_id);
+    static bool matchOrder(connection * C, int trans_id);
 }; 
 #endif

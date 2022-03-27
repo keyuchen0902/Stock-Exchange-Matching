@@ -58,14 +58,10 @@ int main(int argc, char * argv[]) {
   memset(&buffer, '\0', sizeof(buffer));
   std::string str = readFile(argv[1]);
 
-  // cout << "File content:\n" << str;
-
   send(socket_fd, str.c_str(), str.length(), 0);
 
   memset(&response, '\0', sizeof(response));
   recv(socket_fd, response, sizeof(response), 0);
-
-  // cout << "Response:\n" << response << endl;
   cout << response;
 
   freeaddrinfo(host_info_list);

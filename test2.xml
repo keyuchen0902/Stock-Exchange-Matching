@@ -1,6 +1,5 @@
 <results>
-    <opened sym="X" amount="100" limit="1.5" id="1"/>
-    <status id="1">
-        <open shares="100"/>
-    </status>
+    <canceled id="2">
+        <error>the num of open share is 0. Cannot be canceled</error>
+    </canceled>
 </results>

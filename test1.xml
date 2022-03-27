@@ -1,3 +1,3 @@
 <results>
-    <error id="777">account id has not existed or id format wrong</error>
+    <error id="123">account id doesn't exist</error>
 </results>
