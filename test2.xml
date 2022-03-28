@@ -1,5 +1,3 @@
 <results>
-    <canceled id="1">
-        <error>the num of open share is 0. Cannot be canceled</error>
-    </canceled>
+    <opened sym="X" amount="100" limit="2" id="3"/>
 </results>

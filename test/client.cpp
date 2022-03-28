@@ -56,7 +56,15 @@ int main(int argc, char * argv[]) {
   }  //if
 
   memset(&buffer, '\0', sizeof(buffer));
-  std::string str = readFile(argv[1]);
+  std::ifstream ifs(argv[1]);
+  std::string str;
+  std::string line;
+  while (ifs.good()) {
+    getline(ifs, line);
+    str += line;
+    str += "\n";
+  }
+  ifs.close();
 
   send(socket_fd, str.c_str(), str.length(), 0);
 
@@ -68,17 +76,4 @@ int main(int argc, char * argv[]) {
   close(socket_fd);
 
   return 0;
-}
-
-std::string readFile(const char * file) {
-  std::ifstream ifs(file);
-  std::string ans;
-  std::string line;
-  while (ifs.good()) {
-    getline(ifs, line);
-    ans += line;
-    ans += "\n";
-  }
-  ifs.close();
-  return ans;
 }
