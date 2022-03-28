@@ -1,9 +1,13 @@
 <create>
-  <account id="111" balance="10000000000"/>
-  <account id="222" balance="10000000000"/>
+  <account id="1" balance="1000"/>
+  <account id="2" balance="1000"/>
+  <account id="3" balance="1000"/>
   <symbol sym="X">
-    <account id="222">500</account>
-    <account id="111">500</account>
+    <account id="2">300</account>
+    <account id="1">500</account>
+  </symbol>
+  <symbol sym="Y">
+    <account id="3">500</account>
   </symbol>
 </create>
 

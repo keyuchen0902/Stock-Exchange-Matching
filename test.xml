@@ -1,6 +1,8 @@
 <results>
-    <created id="111"/>
-    <created id="222"/>
-    <created sym="X" id="222"/>
-    <created sym="X" id="111"/>
+    <created id="1"/>
+    <created id="2"/>
+    <created id="3"/>
+    <created sym="X" id="2"/>
+    <created sym="X" id="1"/>
+    <created sym="Y" id="3"/>
 </results>

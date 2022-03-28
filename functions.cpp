@@ -292,7 +292,6 @@ XMLDocument *handleTranscation(connection *C, string request)
                 int id_trans = Transaction::addTransaction(C, id, sym, stod(limit), stoi(amount));
                 // Match one possible at a time ??
                 while(Transaction::matchOrder(C,id_trans)){
-                    cout<<"enter here"<<endl;
                 }
                 XMLElement *usernode = response->NewElement("opened");
                 usernode->SetAttribute("sym", sym.c_str());
@@ -351,11 +350,11 @@ XMLDocument *handleTranscation(connection *C, string request)
     return response;
 }
 
-long getCurrTime()
+/*long getCurrTime()
 {
     stringstream ss;
     ss << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::_V2::system_clock::now().time_since_epoch()).count();
     long time;
     ss >> time;
     return time;
-}
+}*/
