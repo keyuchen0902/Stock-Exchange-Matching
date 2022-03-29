@@ -1,21 +1,13 @@
 #include "functions.h"
 
-/*
-XMLDocument *convertToXML(string xml){
-    XMLDocument *doc = new XMLDocument();
-    doc->Parse(xml.c_str());
-    return doc;
-
-}*/
-
 void handleRequest(int client_fd)
 {
-    pqxx::connection *C;
+    connection *C;
     try
     {
         // Establish a connection to the database
         // Parameters: database name, user name, user password
-        C = new pqxx::connection(
+        C = new connection(
             "dbname=postgres user=postgres password=passw0rd");
         if (C->is_open())
         {
@@ -23,7 +15,7 @@ void handleRequest(int client_fd)
         }
         else
         {
-            std::cout << "Can't open database" << std::endl;
+            cout << "Can't open database" << endl;
             exit(EXIT_FAILURE);
         }
     }
