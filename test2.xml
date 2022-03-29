@@ -1,9 +1,11 @@
 <results>
-    <opened sym="Duke" amount="200" limit="1" id="1"/>
-    <opened sym="USA" amount="300" limit="2" id="2"/>
-    <error sym="Duke" amount="-500" limit="1">symbol amount is not enough</error>
-    <opened sym="USA" amount="-300" limit="1" id="3"/>
-    <error sym="Duck" amount="-500" limit="1">symbol amount is not enough</error>
-    <error sym="Duke" amount="200" limit="3">account balance is not enough</error>
-    <opened sym="Duke" amount="-100" limit="2" id="4"/>
+    <status id="4">
+        <open shares="50"/>
+    </status>
+    <status id="5">
+        <executed shares="10" price="10" time="1648571730"/>
+    </status>
+    <status id="6">
+        <executed shares="50" price="20" time="1648571730"/>
+    </status>
 </results>

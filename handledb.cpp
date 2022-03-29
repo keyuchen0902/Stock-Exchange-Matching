@@ -15,7 +15,7 @@ long getCurrTime()
     return time;
 }
 /* Add a new entry to the table, return true if succeed */
-bool Account::addAccount(connection *C, string account_id, double balance)
+bool Account::addAccount(connection *C, string &account_id, double balance)
 {
     /* Create a transactional object. */
     work W(*C);
@@ -43,7 +43,7 @@ bool Account::addAccount(connection *C, string account_id, double balance)
 }
 
 /* Check if the given account already exists */
-bool Account::idExists(connection *C, string account_id)
+bool Account::idExists(connection *C, string &account_id)
 {
     /* Create a non-transactional object. */
     nontransaction N(*C);
@@ -59,7 +59,7 @@ bool Account::idExists(connection *C, string account_id)
     return R.size() != 0;
 }
 
-bool Account::enoughBalance(connection *C, string account_id, double requiredBalance)
+bool Account::enoughBalance(connection *C, string &account_id, double requiredBalance)
 {
     work W(*C);
 
@@ -112,8 +112,8 @@ void Execution::addExecution(work &W,
 }
 
 void Position::addPosition(connection *C,
-                           const string &symbol_name,
-                           string account_id,
+                            string &symbol_name,
+                           string &account_id,
                            int num_share)
 {
     /* Create a transactional object. */
@@ -135,7 +135,7 @@ void Position::addPosition(connection *C,
     W.commit();
 }
 
-bool Position::updateSymbolAmount(connection *C, string symbol_name, string account_id, int amount)
+bool Position::updateSymbolAmount(connection *C, string &symbol_name, string &account_id, int amount)
 {
     work W(*C);
 

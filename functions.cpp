@@ -62,6 +62,18 @@ void handleRequest(int client_fd)
     {
         response = handleTranscation(C, xml);
     }
+
+    XMLPrinter printer;
+    response->Print(&printer);   //将Print打印到Xmlprint类中 即保存在内存中
+    string buf = printer.CStr(); //转换成const char*类型
+
+    send(client_fd, buf.c_str(), buf.length(), 0);
+    // Close database connection
+    C->disconnect();
+    delete C;
+
+    // Close connection
+    close(client_fd);
 }
 
 bool checkAlpha(string sym)
@@ -137,7 +149,7 @@ XMLDocument *handleCreat(connection *C, string request)
             if (Account::idExists(C, id) == true || checkDigits(id) == false)
             {
                 //写error 是否要直接return
-                getAccountError(response, root, id, "account id doesn't exist");
+                getAccountError(response, root, id, "account id has existed");
             }
             else if (balance <= 0)
             {
@@ -171,7 +183,7 @@ XMLDocument *handleCreat(connection *C, string request)
                 }
                 else if (amount < 0)
                 {
-                    getSymbolError(response, root, sym, id, "amount is non-zero");
+                    getSymbolError(response, root, sym, id, "amount should be positive");
                 }
                 else if (Account::idExists(C, id) == false)
                 {
@@ -291,7 +303,8 @@ XMLDocument *handleTranscation(connection *C, string request)
                 // now creat a transaction
                 int id_trans = Transaction::addTransaction(C, id, sym, stod(limit), stoi(amount));
                 // Match one possible at a time ??
-                while(Transaction::matchOrder(C,id_trans)){
+                while (Transaction::matchOrder(C, id_trans))
+                {
                 }
                 XMLElement *usernode = response->NewElement("opened");
                 usernode->SetAttribute("sym", sym.c_str());
@@ -336,7 +349,7 @@ XMLDocument *handleTranscation(connection *C, string request)
             {
                 XMLElement *usernode = response->NewElement("status");
                 usernode->SetAttribute("id", trans_id.c_str());
-                Transaction::handleQuery(C, stoi(trans_id), response, usernode); 
+                Transaction::handleQuery(C, stoi(trans_id), response, usernode);
                 root->InsertEndChild(usernode);
             }
         }

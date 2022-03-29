@@ -16,10 +16,10 @@ class Account
 {
 public:
     /* Add a new entry to the table, return true if succeed */
-    static bool addAccount(connection *C, string account_id, double balance);
+    static bool addAccount(connection *C, string &account_id, double balance);
     /* Check if the given account already exists */
-    static bool idExists(connection *C, string account_id);
-    static bool enoughBalance(connection *C, string account_id, double requiredBalance);
+    static bool idExists(connection *C, string &account_id);
+    static bool enoughBalance(connection *C, string &account_id, double requiredBalance);
 };
 
 class Position
@@ -27,10 +27,10 @@ class Position
 public:
     /* Add a new entry to the table */
     static void addPosition(connection *C,
-                            const string &symbol_name,
-                            string account_id,
+                             string &symbol_name,
+                            string &account_id,
                             int num_share);
-    static bool updateSymbolAmount(connection *C, string symbol_name, string account_id, int amount);
+    static bool updateSymbolAmount(connection *C, string &symbol_name, string &account_id, int amount);
 };
 
 class Transaction

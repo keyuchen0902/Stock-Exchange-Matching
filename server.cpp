@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 {
   // Create socket
   int status;
-  int sockfd;
+  int server_fd;
   struct addrinfo host_info;
   struct addrinfo *host_info_list;
   char hostname[128];
@@ -40,9 +40,9 @@ int main(int argc, char **argv)
     return -1;
   } // if
 
-  sockfd =
+  server_fd =
       socket(host_info_list->ai_family, host_info_list->ai_socktype, host_info_list->ai_protocol);
-  if (sockfd == -1)
+  if (server_fd == -1)
   {
     cerr << "Error: cannot create socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
@@ -50,8 +50,8 @@ int main(int argc, char **argv)
   } // if
 
   int yes = 1;
-  status = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
-  status = bind(sockfd, host_info_list->ai_addr, host_info_list->ai_addrlen);
+  status = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int));
+  status = bind(server_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1)
   {
     cerr << "Error: cannot bind socket" << endl;
@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   } // if
 
   // Listening
-  if (listen(sockfd, 100) != 0)
+  if (listen(server_fd, 100) != 0)
   {
     std::cout << "Error in listening" << std::endl;
     exit(1);
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
     socklen_t socket_addr_len = sizeof(socket_addr);
 
     // Accept request
-    int client_fd = accept(sockfd, (struct sockaddr *)&socket_addr, &socket_addr_len);
+    int client_fd = accept(server_fd, (struct sockaddr *)&socket_addr, &socket_addr_len);
     if (client_fd < 0)
     {
       cout << "Error in accept" << endl;
@@ -112,7 +112,7 @@ int main(int argc, char **argv)
     onethread.detach();
   }
   freeaddrinfo(host_info_list);
-  close(sockfd);
+  close(server_fd);
 
   return 0;
 }
