@@ -6,9 +6,11 @@
 #include "database.h"
 #include "tinyxml2.h"
 
-using std::string;
+using namespace std;
 using namespace pqxx;
 using namespace tinyxml2;
+
+
 
 class Account
 {

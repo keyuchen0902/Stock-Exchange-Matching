@@ -22,7 +22,7 @@ int main(int argc, char **argv)
   char hostname[128];
   if (gethostname(hostname, sizeof(hostname)) == -1)
   {
-    std::cout << "Hostname access fail" << std::endl;
+    cout << "Hostname access fail" << endl;
     exit(1);
   }
   const char *port = "12345";
@@ -35,8 +35,8 @@ int main(int argc, char **argv)
   status = getaddrinfo(hostname, port, &host_info, &host_info_list);
   if (status != 0)
   {
-    std::cerr << "Error: cannot get address info for host" << std::endl;
-    std::cerr << "  (" << hostname << "," << port << ")" << std::endl;
+    cerr << "Error: cannot get address info for host" << endl;
+    cerr << "  (" << hostname << "," << port << ")" << endl;
     return -1;
   } // if
 
@@ -44,8 +44,8 @@ int main(int argc, char **argv)
       socket(host_info_list->ai_family, host_info_list->ai_socktype, host_info_list->ai_protocol);
   if (sockfd == -1)
   {
-    std::cerr << "Error: cannot create socket" << std::endl;
-    std::cerr << "  (" << hostname << "," << port << ")" << std::endl;
+    cerr << "Error: cannot create socket" << endl;
+    cerr << "  (" << hostname << "," << port << ")" << endl;
     return -1;
   } // if
 
@@ -54,8 +54,8 @@ int main(int argc, char **argv)
   status = bind(sockfd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1)
   {
-    std::cerr << "Error: cannot bind socket" << std::endl;
-    std::cerr << "  (" << hostname << "," << port << ")" << std::endl;
+    cerr << "Error: cannot bind socket" << endl;
+    cerr << "  (" << hostname << "," << port << ")" << endl;
     return -1;
   } // if
 
@@ -66,26 +66,26 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  pqxx::connection *C;
+  connection *C;
   try
   {
     // Establish a connection to the database
     // Parameters: database name, user name, user password
-    C = new pqxx::connection(
+    C = new connection(
         "dbname=postgres user=postgres password=passw0rd");
     if (C->is_open())
     {
-      // cout << "Opened database successfully: " << C->dbname() << endl;
+      cout << "Opened database successfully: " << C->dbname() << endl;
     }
     else
     {
-      std::cout << "Can't open database" << std::endl;
+      cout << "Can't open database" << endl;
       exit(EXIT_FAILURE);
     }
   }
-  catch (const std::exception &e)
+  catch (const exception &e)
   {
-    std::cerr << e.what() << std::endl;
+    cerr << e.what() << endl;
     exit(EXIT_FAILURE);
   }
 
@@ -104,25 +104,13 @@ int main(int argc, char **argv)
     int client_fd = accept(sockfd, (struct sockaddr *)&socket_addr, &socket_addr_len);
     if (client_fd < 0)
     {
-      std::cout << "Error in accept" << std::endl;
-      std::cout << errno << std::endl;
+      cout << "Error in accept" << endl;
       exit(1);
     }
 
-    try
-    {
-      handleRequest(client_fd);
-    }
-    catch (std::exception &e)
-    {
-      // General catch exception to return 404, rarely gets here though
-      // Because we have other try & catch in handlehttp
-      std::cout << e.what() << std::endl;
-      close(client_fd);
-    }
+    thread onethread(handleRequest, client_fd);
+    onethread.detach();
   }
-
-  // Free resources
   freeaddrinfo(host_info_list);
   close(sockfd);
 

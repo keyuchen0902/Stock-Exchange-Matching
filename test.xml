@@ -2,7 +2,18 @@
     <created id="1"/>
     <created id="2"/>
     <created id="3"/>
-    <created sym="X" id="2"/>
-    <created sym="X" id="1"/>
-    <created sym="Y" id="3"/>
+    <created id="4"/>
+    <created id="5"/>
+    <error id="1">account id doesn't exist</error>
+    <error id="2">account id doesn't exist</error>
+    <created sym="Duke" id="1"/>
+    <created sym="Duke" id="2"/>
+    <created sym="Duke" id="3"/>
+    <created sym="Duke" id="3"/>
+    <created sym="USA" id="1"/>
+    <created sym="USA" id="4"/>
+    <created sym="USA" id="5"/>
+    <created sym="USA" id="5"/>
+    <error sym="USA" id="6">account id doesn't exist</error>
+    <created id="999"/>
 </results>

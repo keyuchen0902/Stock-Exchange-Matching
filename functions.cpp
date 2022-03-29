@@ -349,12 +349,3 @@ XMLDocument *handleTranscation(connection *C, string request)
     cout << buf << endl;         // buf即为创建后的XML 字符串。
     return response;
 }
-
-/*long getCurrTime()
-{
-    stringstream ss;
-    ss << std::chrono::duration_cast<std::chrono::seconds>(std::chrono::_V2::system_clock::now().time_since_epoch()).count();
-    long time;
-    ss >> time;
-    return time;
-}*/

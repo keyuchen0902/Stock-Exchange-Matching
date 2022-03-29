@@ -22,7 +22,7 @@ bool Account::addAccount(connection *C, string account_id, double balance)
 
     /* Create SQL statement */
     std::stringstream sql;
-    sql << "Insert INTO ACCOUNT (ACCOUNT_ID, BALANCE) ";
+    sql << "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) ";
     sql << "VALUES (";
     sql << W.quote(account_id) << ", ";
     sql << W.quote(balance) << ");";
@@ -472,8 +472,6 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
 
 bool Transaction::matchOrder(connection *C, int trans_id)
 {
-    /* Create a non-transactional object. */
-
     work W(*C);
 
     // Lock all rows related to current transaction's owner
