@@ -1,13 +1,29 @@
 <create>
-  <account id="1" balance="1000"/>
-  <account id="2" balance="1000"/>
-  <account id="3" balance="1000"/>
-  <symbol sym="X">
-    <account id="2">300</account>
-    <account id="1">500</account>
+  <account id="1" balance="10000"/>
+  <account id="2" balance="10000"/>
+  <account id="3" balance="30000"/>
+  <account id="4" balance="10000"/>
+  <account id="1" balance="10000"/>
+  <symbol sym="A">
+    <account id="1">1000</account>
+    <account id="1">1000</account>
+    <account id="2">1000</account>
+    <account id="5">1000</account>
   </symbol>
-  <symbol sym="Y">
-    <account id="3">500</account>
+  <symbol sym="A">
+    <account id="1">1000</account>
+  </symbol>
+  <symbol sym="B">
+    <account id="2">1000</account>
+   <account id="3">1000</account>
+  </symbol>
+  <symbol sym="C">
+    <account id="1">1000</account>  
+  </symbol>
+  <symbol sym="A">
+    <account id="4">1000</account>
+  </symbol>
+  <symbol sym="B">
+    <account id="4">1000</account>
   </symbol>
 </create>
-

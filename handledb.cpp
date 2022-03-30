@@ -472,6 +472,7 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
 
 bool Transaction::matchOrder(connection *C, int trans_id)
 {
+    MyLock lk(&mymutex);
     work W(*C);
 
     // Lock all rows related to current transaction's owner

@@ -2,7 +2,7 @@
 
 #include <pqxx/pqxx>
 #include <string>
-
+#include <mutex>
 #include "database.h"
 #include "tinyxml2.h"
 
@@ -10,7 +10,20 @@ using namespace std;
 using namespace pqxx;
 using namespace tinyxml2;
 
+extern std::mutex mymutex;
+class MyLock
+{
+ private:
+  std::mutex * mtx;
 
+ public:
+  explicit MyLock(std::mutex * temp) {
+    temp->lock();
+    mtx = temp;
+  }
+
+  ~MyLock() { mtx->unlock(); }
+};
 
 class Account
 {

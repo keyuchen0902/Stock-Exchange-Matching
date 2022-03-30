@@ -31,6 +31,7 @@ void handleRequest(int client_fd)
     }
     // loop and dispatch
     char buffer[40960];
+   
     XMLDocument *response = new XMLDocument(); // Q
     // string response;
 
@@ -119,7 +120,7 @@ void getSymbolError(XMLDocument *response, XMLElement *root, string sym, string 
     root->InsertEndChild(usernode);
 }
 
-XMLDocument *handleCreat(connection *C, string request)
+XMLDocument *handleCreat(connection *C, string &request)
 {
     XMLDocument *response = new XMLDocument();
 
@@ -216,7 +217,7 @@ void getTransError(XMLDocument *response, XMLElement *root, string sym, string a
     root->InsertEndChild(usernode);
 }
 
-XMLDocument *handleTranscation(connection *C, string request)
+XMLDocument *handleTranscation(connection *C, string &request)
 {
     XMLDocument *response = new XMLDocument();
 

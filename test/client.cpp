@@ -10,8 +10,6 @@
 
 using namespace std;
 
-string readFile(const char * file);
-
 int main(int argc, char * argv[]) {
   int status;
   int socket_fd;

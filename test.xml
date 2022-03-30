@@ -1,11 +1,17 @@
 <results>
-    <created id="123"/>
-    <created sym="Nike" id="123"/>
-    <created sym="Nike" id="123"/>
-    <error sym="Nike" id="456">account id doesn't exist</error>
-    <error sym="Nike" id="777">account id doesn't exist</error>
-    <created id="456"/>
-    <created sym="Adidas" id="456"/>
-    <error sym="Adidas" id="123">amount should be positive</error>
-    <error id="123">account id has existed</error>
+    <created id="1"/>
+    <created id="2"/>
+    <created id="3"/>
+    <created id="4"/>
+    <error id="1">account id has existed</error>
+    <created sym="A" id="1"/>
+    <created sym="A" id="1"/>
+    <created sym="A" id="2"/>
+    <error sym="A" id="5">account id doesn't exist</error>
+    <created sym="A" id="1"/>
+    <created sym="B" id="2"/>
+    <created sym="B" id="3"/>
+    <created sym="C" id="1"/>
+    <created sym="A" id="4"/>
+    <created sym="B" id="4"/>
 </results>

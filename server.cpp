@@ -11,7 +11,7 @@
 #include <pqxx/pqxx>
 #include "database.h"
 #include "functions.h"
-
+std::mutex mymutex;
 int main(int argc, char **argv)
 {
   // Create socket

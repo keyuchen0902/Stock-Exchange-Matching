@@ -22,7 +22,7 @@ using namespace std;
 
 
 void handleRequest(int client_fd);  // parse
-XMLDocument* handleCreat(connection *C, string request);
-XMLDocument* handleTranscation(connection *C, string request);
+XMLDocument* handleCreat(connection *C, string &request);
+XMLDocument* handleTranscation(connection *C, string &request);
 long getCurrTime();
 #endif
