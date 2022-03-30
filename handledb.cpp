@@ -15,7 +15,7 @@ long getCurrTime()
     return time;
 }
 /* Add a new entry to the table, return true if succeed */
-bool Account::addAccount(connection *C, string &account_id, double balance)
+bool MyDB::addAccount(connection *C, string &account_id, double balance)
 {
     work W(*C);
     std::stringstream sql;
@@ -39,7 +39,7 @@ bool Account::addAccount(connection *C, string &account_id, double balance)
 }
 
 /* Check if the given account already exists */
-bool Account::idExists(connection *C, string &account_id)
+bool MyDB::idExists(connection *C, string &account_id)
 {
     nontransaction N(*C);
 
@@ -52,7 +52,7 @@ bool Account::idExists(connection *C, string &account_id)
     return R.size() != 0;
 }
 
-bool Account::enoughBalance(connection *C, string &account_id, double requiredBalance)
+bool MyDB::enoughBalance(connection *C, string &account_id, double requiredBalance)
 {
     work W(*C);
 
@@ -84,7 +84,7 @@ bool Account::enoughBalance(connection *C, string &account_id, double requiredBa
 }
 
 /* Add a new entry to the table */
-void Execution::addExecution(work &W,
+void MyDB::addExecution(work &W,
                              int buyer_trans_id,
                              int seller_trans_id,
                              int amount,
@@ -103,7 +103,7 @@ void Execution::addExecution(work &W,
     W.exec(sql.str());
 }
 
-void Position::addPosition(connection *C,
+void MyDB::addPosition(connection *C,
                            string &symbol_name,
                            string &account_id,
                            int num_share)
@@ -123,7 +123,7 @@ void Position::addPosition(connection *C,
     W.commit();
 }
 
-bool Position::updateSymbolAmount(connection *C, string &symbol_name, string &account_id, int amount)
+bool MyDB::updateSymbolAmount(connection *C, string &symbol_name, string &account_id, int amount)
 {
     work W(*C);
 
@@ -164,7 +164,7 @@ bool Position::updateSymbolAmount(connection *C, string &symbol_name, string &ac
 }
 
 /* Add a new entry to the table, return the transaction_id */
-int Transaction::addTransaction(connection *C,
+int MyDB::addTransaction(connection *C,
                                 const string &account_id,
                                 const string &symbol_name,
                                 double limited,
@@ -188,7 +188,7 @@ int Transaction::addTransaction(connection *C,
     return R[0][0].as<int>();
 }
 
-bool Transaction::isTransExists(connection *C, int trans_id)
+bool MyDB::isTransExists(connection *C, int trans_id)
 {
     nontransaction N(*C);
 
@@ -201,7 +201,7 @@ bool Transaction::isTransExists(connection *C, int trans_id)
 }
 
 /* Get the cancel_time*/
-long Transaction::getCanceledTime(connection *C, int trans_id)
+long MyDB::getCanceledTime(connection *C, int trans_id)
 {
     nontransaction N(*C);
 
@@ -215,7 +215,7 @@ long Transaction::getCanceledTime(connection *C, int trans_id)
     return R[0][0].as<long>();
 }
 
-void Transaction::handleQuery(connection *C, int trans_id, XMLDocument *response, XMLElement *usernode)
+void MyDB::handleQuery(connection *C, int trans_id, XMLDocument *response, XMLElement *usernode)
 {
     work W(*C);
 
@@ -280,7 +280,7 @@ void Transaction::handleQuery(connection *C, int trans_id, XMLDocument *response
 }
 
 /* Get the limited price of the given trans_id */
-double Transaction::getLimited(connection *C, int trans_id)
+double MyDB::getLimited(connection *C, int trans_id)
 {
     nontransaction N(*C);
     std::stringstream sql;
@@ -357,7 +357,7 @@ void creatExecutedPrinted(connection *C, int trans_id, XMLDocument *response, XM
         usernode->InsertEndChild(node3);
     }
 }
-void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLElement *usernode)
+void MyDB::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLElement *usernode)
 {
     work W1(*C);
     std::stringstream sql1;
@@ -398,7 +398,7 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
     if (num_open > 0)
     { // buyer,need to return money
         cout << "enter here4" << endl;
-        double limiited = Transaction::getLimited(C, trans_id);
+        double limiited = MyDB::getLimited(C, trans_id);
         cout << "enter here5" << endl;
         work W2(*C);
         std::stringstream sql3;
@@ -435,7 +435,7 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
         W2.commit();
     }
     int canceledShares = getCanceledNum(C, trans_id);
-    long canceledTime = Transaction::getCanceledTime(C, trans_id);
+    long canceledTime = MyDB::getCanceledTime(C, trans_id);
     XMLElement *node2 = response->NewElement("canceled");
     node2->SetAttribute("shares", canceledShares);
     node2->SetAttribute("time", canceledTime);
@@ -444,7 +444,7 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
     creatExecutedPrinted(C, trans_id, response, usernode);
 }
 
-bool Transaction::matchOrder(connection *C, int trans_id)
+bool MyDB::matchOrder(connection *C, int trans_id)
 {
     MyLock lk(&mymutex);
     work W(*C);
@@ -580,7 +580,7 @@ bool Transaction::matchOrder(connection *C, int trans_id)
         W.exec(sql2.str());
 
         // Create execution
-        Execution::addExecution(W, trans_id, other_trans_id, final_amount, final_price);
+        MyDB::addExecution(W, trans_id, other_trans_id, final_amount, final_price);
     }
     else
     {
@@ -637,7 +637,7 @@ bool Transaction::matchOrder(connection *C, int trans_id)
         sql2 << W.quote(account_id) << ";";
         W.exec(sql2.str());
 
-        Execution::addExecution(W, other_trans_id, trans_id, final_amount, final_price);
+        MyDB::addExecution(W, other_trans_id, trans_id, final_amount, final_price);
     }
     std::stringstream openshare_sql;
     openshare_sql << "SELECT NUM_OPEN FROM TRANSACTION WHERE TRANSACTION_ID=";

@@ -139,7 +139,7 @@ XMLDocument *handleCreat(connection *C, string &request)
             string id = currElem->FirstAttribute()->Value(); // Q检查id是否为string
             double balance = currElem->FindAttribute("balance")->DoubleValue();
 
-            if (Account::idExists(C, id) == true || checkDigits(id) == false)
+            if (MyDB::idExists(C, id) == true || checkDigits(id) == false)
             {
                 //写error 是否要直接return
                 getAccountError(response, root, id, "account id has existed");
@@ -154,7 +154,7 @@ XMLDocument *handleCreat(connection *C, string &request)
             }
             else
             { //创建一个account
-                Account::addAccount(C, id, balance);
+                MyDB::addAccount(C, id, balance);
                 XMLElement *usernode = response->NewElement("created");
                 usernode->SetAttribute("id", id.c_str());
                 root->InsertEndChild(usernode);
@@ -178,7 +178,7 @@ XMLDocument *handleCreat(connection *C, string &request)
                 {
                     getSymbolError(response, root, sym, id, "amount should be positive");
                 }
-                else if (Account::idExists(C, id) == false)
+                else if (MyDB::idExists(C, id) == false)
                 {
                     getSymbolError(response, root, sym, id, "account id doesn't exist");
                 }
@@ -188,7 +188,7 @@ XMLDocument *handleCreat(connection *C, string &request)
                 }
                 else
                 {
-                    Position::addPosition(C, sym, id, amount);
+                    MyDB::addPosition(C, sym, id, amount);
                     XMLElement *usernode = response->NewElement("created");
                     usernode->SetAttribute("sym", sym.c_str());
                     usernode->SetAttribute("id", id.c_str());
@@ -229,7 +229,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
 
     XMLElement *xml_root = xml->RootElement();
     string id = xml_root->FindAttribute("id")->Value();
-    if (Account::idExists(C, id) == false || !checkDigits(id))
+    if (MyDB::idExists(C, id) == false || !checkDigits(id))
     {
         getAccountError(response, root, id, "account id doesn't exist");
         response->SaveFile("test1.xml");
@@ -277,7 +277,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
                 if (stoi(amount) > 0)
                 { //检查账户余额是否充足，并更新账户余额 买
                     double requiredBalance = stoi(amount) * stod(limit);
-                    if (!Account::enoughBalance(C, id, requiredBalance))
+                    if (!MyDB::enoughBalance(C, id, requiredBalance))
                     {
                         getTransError(response, root, sym, amount, limit, "account balance is not enough");
                         currElem = currElem->NextSiblingElement();
@@ -286,7 +286,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
                 }
                 else if (stoi(amount) < 0)
                 { // amount<0 means sell 检查symbol的amount是否足够并更新
-                    if (!Position::updateSymbolAmount(C, sym, id, 0 - stoi(amount)))
+                    if (!MyDB::updateSymbolAmount(C, sym, id, 0 - stoi(amount)))
                     {
                         getTransError(response, root, sym, amount, limit, "symbol amount is not enough");
                         currElem = currElem->NextSiblingElement();
@@ -294,9 +294,9 @@ XMLDocument *handleTranscation(connection *C, string &request)
                     }
                 }
                 // now creat a transaction
-                int id_trans = Transaction::addTransaction(C, id, sym, stod(limit), stoi(amount));
+                int id_trans = MyDB::addTransaction(C, id, sym, stod(limit), stoi(amount));
                 // Match one possible at a time ??
-                while (Transaction::matchOrder(C, id_trans))
+                while (MyDB::matchOrder(C, id_trans))
                 {
                 }
                 XMLElement *usernode = response->NewElement("opened");
@@ -314,7 +314,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
             {
                 getAccountError(response, root, id, "transcation id format is wrong");
             }
-            else if (!Transaction::isTransExists(C, stoi(trans_id)))
+            else if (!MyDB::isTransExists(C, stoi(trans_id)))
             {
                 getAccountError(response, root, id, "transcation id does not exist");
             }
@@ -322,7 +322,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
             {
                 XMLElement *usernode = response->NewElement("canceled");
                 usernode->SetAttribute("id", trans_id.c_str());
-                Transaction::handleCancel(C, stoi(trans_id), response, usernode); // Q内存问题 对response进行修改
+                MyDB::handleCancel(C, stoi(trans_id), response, usernode); // Q内存问题 对response进行修改
                 root->InsertEndChild(usernode);
             }
         }
@@ -334,7 +334,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
             {
                 getAccountError(response, root, id, "transcation id format is wrong");
             }
-            else if (!Transaction::isTransExists(C, stoi(trans_id)))
+            else if (!MyDB::isTransExists(C, stoi(trans_id)))
             {
                 getAccountError(response, root, id, "transcation id does not exist");
             }
@@ -342,7 +342,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
             {
                 XMLElement *usernode = response->NewElement("status");
                 usernode->SetAttribute("id", trans_id.c_str());
-                Transaction::handleQuery(C, stoi(trans_id), response, usernode);
+                MyDB::handleQuery(C, stoi(trans_id), response, usernode);
                 root->InsertEndChild(usernode);
             }
         }
