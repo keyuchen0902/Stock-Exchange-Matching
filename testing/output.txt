@@ -1,0 +1,97 @@
+text1.txt:
+    <results>
+        <created id="1"/>
+        <created id="2"/>
+        <created id="3"/>
+        <created id="4"/>
+        <error id="1">account id has existed</error>
+        <created sym="A" id="1"/>
+        <created sym="A" id="1"/>
+        <created sym="A" id="2"/>
+        <error sym="A" id="5">account id doesn't exist</error>
+        <created sym="A" id="1"/>
+        <created sym="B" id="2"/>
+        <created sym="B" id="3"/>
+        <created sym="C" id="1"/>
+        <created sym="A" id="4"/>
+        <created sym="B" id="4"/>
+    </results>
+
+text2.txt:
+    <results>
+        <error sym="A" amount="-5000" limit="100">symbol amount is not enough</error>
+        <opened sym="A" amount="-500" limit="100" id="1"/>
+        <error sym="B" amount="500" limit="100">account balance is not enough</error>
+        <opened sym="B" amount="5" limit="100" id="2"/>
+        <opened sym="C" amount="-10" limit="50" id="3"/>
+        <error sym="B" amount="-200000" limit="20000">symbol amount is not enough</error>
+        <error sym="D" amount="20" limit="2000">account balance is not enough</error>
+    </results>
+
+text3.txt:
+    <results>
+        <status id="1">
+            <open shares="-500"/>
+        </status>
+        <status id="2">
+            <open shares="5"/>
+        </status>
+        <status id="3">
+            <open shares="-10"/>
+        </status>
+        <error id="1">transcation id does not exist</error>
+    </results>
+
+text4.txt:
+    <results>
+        <opened sym="A" amount="-8" limit="50" id="4"/>
+        <opened sym="B" amount="10" limit="100" id="5"/>
+        <opened sym="C" amount="10" limit="70" id="6"/>
+        <status id="6">
+            <executed shares="10" price="50" time="1648648944"/>
+        </status>
+    </results>
+
+text5.txt:
+    <results>
+        <opened sym="A" amount="100" limit="100" id="7"/>
+        <opened sym="B" amount="-30" limit="50" id="8"/>
+        <opened sym="C" amount="40" limit="50" id="9"/>
+    </results>
+
+text6.txt:
+    <results>
+    <status id="7">
+        <executed shares="8" price="50" time="1648659649"/>
+        <executed shares="92" price="100" time="1648659649"/>
+    </status>
+    <status id="6">
+        <executed shares="10" price="50" time="1648659646"/>
+    </status>
+    <status id="1">
+        <open shares="-408"/>
+        <executed shares="-92" price="100" time="1648659649"/>
+    </status>
+    <status id="2">
+        <executed shares="5" price="100" time="1648659649"/>
+    </status>
+    <canceled id="8">
+        <canceled shares="-15" time="1648659654"/>
+        <executed shares="-5" price="100" time="1648659649"/>
+        <executed shares="-10" price="100" time="1648659649"/>
+    </canceled>
+    <canceled id="7">
+        <error>the num of open share is 0. Cannot be canceled</error>
+    </canceled>
+    <canceled id="1">
+        <canceled shares="-408" time="1648659654"/>
+        <executed shares="-92" price="100" time="1648659649"/>
+    </canceled>
+</results>
+
+text7.txt:
+<results>
+    <canceled id="1">
+        <error>the num of open share is 0. Cannot be canceled</error>
+    </canceled>
+</results>

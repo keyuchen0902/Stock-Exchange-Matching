@@ -17,17 +17,13 @@ long getCurrTime()
 /* Add a new entry to the table, return true if succeed */
 bool Account::addAccount(connection *C, string &account_id, double balance)
 {
-    /* Create a transactional object. */
     work W(*C);
-
-    /* Create SQL statement */
     std::stringstream sql;
     sql << "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) ";
     sql << "VALUES (";
     sql << W.quote(account_id) << ", ";
     sql << W.quote(balance) << ");";
 
-    /* Execute SQL query */
     try
     {
         W.exec(sql.str());
@@ -45,15 +41,12 @@ bool Account::addAccount(connection *C, string &account_id, double balance)
 /* Check if the given account already exists */
 bool Account::idExists(connection *C, string &account_id)
 {
-    /* Create a non-transactional object. */
     nontransaction N(*C);
 
-    /* Create SQL statement */
     std::stringstream sql;
     sql << "SELECT * FROM ACCOUNT WHERE ACCOUNT_ID=";
     sql << N.quote(account_id) << ";";
 
-    /* Execute SQL query */
     result R(N.exec(sql.str()));
 
     return R.size() != 0;
@@ -97,7 +90,6 @@ void Execution::addExecution(work &W,
                              int amount,
                              double price)
 {
-    /* Create SQL statement */
     std::stringstream sql;
     sql << "Insert INTO EXECUTION (EXECUTION_ID, BUYER_TRANS_ID, SELLER_TRANS_ID, ";
     sql << "AMOUNT, PRICE, TIME) ";
@@ -112,15 +104,11 @@ void Execution::addExecution(work &W,
 }
 
 void Position::addPosition(connection *C,
-                            string &symbol_name,
+                           string &symbol_name,
                            string &account_id,
                            int num_share)
 {
-    /* Create a transactional object. */
     work W(*C);
-
-    /* Create SQL statement */
-
     std::stringstream sql;
     sql << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
     sql << "VALUES (";
@@ -182,10 +170,7 @@ int Transaction::addTransaction(connection *C,
                                 double limited,
                                 int num_open)
 {
-    /* Create a transactional object. */
     work W(*C);
-
-    /* Create SQL statement */
     std::stringstream sql;
     sql << "Insert INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SYMBOL_NAME, "
            "LIMITED, NUM_OPEN, NUM_CANCELED, OPEN_TIME, CANCEL_TIME) ";
@@ -205,27 +190,21 @@ int Transaction::addTransaction(connection *C,
 
 bool Transaction::isTransExists(connection *C, int trans_id)
 {
-    /* Create a non-transactional object. */
     nontransaction N(*C);
 
-    /* Create SQL statement */
     std::stringstream sql;
     sql << "SELECT * FROM TRANSACTION WHERE TRANSACTION_ID=";
     sql << N.quote(trans_id) << ";";
-
-    /* Execute SQL query */
     result R(N.exec(sql.str()));
 
     return R.size() != 0;
 }
 
-/* Get the cancel_time of the given trans_id */
+/* Get the cancel_time*/
 long Transaction::getCanceledTime(connection *C, int trans_id)
 {
-    /* Create a non-transactional object. */
     nontransaction N(*C);
 
-    /* Create SQL statement */
     std::stringstream sql;
     sql << "SELECT CANCEL_TIME FROM TRANSACTION WHERE TRANSACTION_ID=";
     sql << N.quote(trans_id) << ";";
@@ -315,12 +294,10 @@ double Transaction::getLimited(connection *C, int trans_id)
 string getAccountID(connection *C, int trans_id)
 {
     nontransaction N1(*C); // Q需不需要每次都创建
-    /* Create SQL statement */
     std::stringstream sql;
     sql << "SELECT ACCOUNT_ID FROM TRANSACTION WHERE TRANSACTION_ID=";
     sql << N1.quote(trans_id) << ";";
 
-    /* Execute SQL query */
     result R1(N1.exec(sql.str()));
     string account_id = R1[0][0].as<string>();
     N1.commit();
@@ -382,19 +359,15 @@ void creatExecutedPrinted(connection *C, int trans_id, XMLDocument *response, XM
 }
 void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLElement *usernode)
 {
-    /* Create a transactional object. */
     work W1(*C);
-
-    /* Create SQL statement */
     std::stringstream sql1;
     sql1 << "SELECT NUM_OPEN FROM TRANSACTION WHERE TRANSACTION_ID=";
     sql1 << W1.quote(trans_id) << " FOR UPDATE;";
 
-    /* Execute SQL query */
     result R(W1.exec(sql1.str()));
 
     int num_open = R[0]["NUM_OPEN"].as<int>();
-    // bool flag = true;
+    cout << num_open <<endl;
     if (num_open == 0)
     {
         W1.commit();
@@ -411,7 +384,9 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
     sql2 << "UPDATE TRANSACTION SET ";
     sql2 << "NUM_CANCELED = TRANSACTION.NUM_OPEN, ";
     sql2 << "NUM_OPEN = 0, ";
-    sql2 << "CANCEL_TIME = " << W1.quote(getCurrTime()) << ";";
+    sql2 << "CANCEL_TIME = " << W1.quote(getCurrTime());
+    sql2 << "WHERE TRANSACTION_ID=";
+    sql2 << W1.quote(trans_id) << " ;";
 
     W1.exec(sql2);
     W1.commit();
@@ -422,9 +397,9 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
     cout << "enter here3" << endl;
     if (num_open > 0)
     { // buyer,need to return money
-        cout<<"enter here4"<<endl;
+        cout << "enter here4" << endl;
         double limiited = Transaction::getLimited(C, trans_id);
-        cout<<"enter here5"<<endl;
+        cout << "enter here5" << endl;
         work W2(*C);
         std::stringstream sql3;
         sql3 << "SELECT BALANCE FROM ACCOUNT WHERE ACCOUNT_ID = ";
@@ -443,7 +418,6 @@ void Transaction::handleCancel(connection *C, int trans_id, XMLDocument *respons
 
         W2.exec(sql4);
         W2.commit();
-   
     }
     else
     { // num <0,sell, return symbol
@@ -585,14 +559,6 @@ bool Transaction::matchOrder(connection *C, int trans_id)
         /* Execute SQL query */
         W.exec(sql.str());
 
-        // give money to seller
-        std::stringstream sql2;
-        sql2 << "UPDATE ACCOUNT SET BALANCE = ACCOUNT.BALANCE + ";
-        sql2 << W.quote(final_amount * final_price) << " ";
-        sql2 << "WHERE ACCOUNT_ID = ";
-        sql2 << W.quote(other_account_id) << ";";
-        W.exec(sql2.str());
-
         // give symbol to buyer ???实现未成功
         std::stringstream sql3;
         sql3 << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
@@ -603,8 +569,16 @@ bool Transaction::matchOrder(connection *C, int trans_id)
         sql3 << "ON CONFLICT ON CONSTRAINT POSITION_PKEY ";
         sql3 << "DO UPDATE SET NUM_SHARE = POSITION.NUM_SHARE + ";
         sql3 << W.quote(final_amount) << ";";
-
         W.exec(sql3.str());
+
+        // give money to seller
+        std::stringstream sql2;
+        sql2 << "UPDATE ACCOUNT SET BALANCE = ACCOUNT.BALANCE + ";
+        sql2 << W.quote(final_amount * final_price) << " ";
+        sql2 << "WHERE ACCOUNT_ID = ";
+        sql2 << W.quote(other_account_id) << ";";
+        W.exec(sql2.str());
+
         // Create execution
         Execution::addExecution(W, trans_id, other_trans_id, final_amount, final_price);
     }
@@ -643,16 +617,7 @@ bool Transaction::matchOrder(connection *C, int trans_id)
             sql2 << "WHERE TRANSACTION_ID = ";
             sql2 << W.quote(other_trans_id) << ";";
             W.exec(sql2.str());
-        }
-        // give money to seller
-        std::stringstream sql2;
-        sql2 << "UPDATE ACCOUNT SET BALANCE = ACCOUNT.BALANCE + ";
-        sql2 << W.quote(final_amount * final_price) << " ";
-        sql2 << "WHERE ACCOUNT_ID = ";
-        sql2 << W.quote(other_account_id) << ";";
-        W.exec(sql2.str());
-
-        // give symbol to buyer
+        } // give symbol to buyer
         std::stringstream sql3;
         sql3 << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
         sql3 << "VALUES (";
@@ -662,6 +627,15 @@ bool Transaction::matchOrder(connection *C, int trans_id)
         sql3 << "ON CONFLICT ON CONSTRAINT POSITION_PKEY ";
         sql3 << "DO UPDATE SET NUM_SHARE = POSITION.NUM_SHARE + ";
         sql3 << W.quote(final_amount) << ";";
+        W.exec(sql3.str());
+
+        // give money to seller
+        std::stringstream sql2;
+        sql2 << "UPDATE ACCOUNT SET BALANCE = ACCOUNT.BALANCE + ";
+        sql2 << W.quote(final_amount * final_price) << " ";
+        sql2 << "WHERE ACCOUNT_ID = ";
+        sql2 << W.quote(account_id) << ";";
+        W.exec(sql2.str());
 
         Execution::addExecution(W, other_trans_id, trans_id, final_amount, final_price);
     }

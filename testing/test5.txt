@@ -1,0 +1,5 @@
+<transactions id="3">
+  <order sym="A" amount="100" limit="100"/>  
+  <order sym="B" amount="-30" limit="50"/>   
+  <order sym="C" amount="40" limit="50"/> 
+</transactions>

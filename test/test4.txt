@@ -1,6 +1,0 @@
-<transactions id="2">
-  <order sym="A" amount="-8" limit="100"/>
-  <order sym="B" amount="10" limit="100"/>
-  <order sym="C" amount="10" limit="70"/>  <!--execute-->
-  <query id="6"/>
-</transactions>
