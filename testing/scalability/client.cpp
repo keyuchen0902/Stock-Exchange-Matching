@@ -55,13 +55,14 @@ int main(int argc, char **argv) {
   cout << times << " threads.\n";
 
   std::vector<std::thread> threads;
-
+  
+  // get start time
+  starttime = high_resolution_clock::now();
   for (int i = 0; i < times; i++) {
     threads.push_back(std::thread(sendRequest, i, times));
   }
 
-  // get start time
-  starttime = high_resolution_clock::now();
+
 
   try {
     for (int i = 0; i < times; i++) {
@@ -272,4 +273,4 @@ string cancel(int trans_id) {
   ss << "  <cancel id=\"";
   ss << trans_id << "\"/>\n";
   return ss.str();
-}
+} 
