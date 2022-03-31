@@ -2,6 +2,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -70,8 +71,10 @@ int main(int argc, char * argv[]) {
   recv(socket_fd, response, sizeof(response), 0);
   cout << response;
 
+
   freeaddrinfo(host_info_list);
   close(socket_fd);
+
 
   return 0;
 }

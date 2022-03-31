@@ -1,17 +1,7 @@
 <results>
-    <created id="1"/>
-    <created id="2"/>
-    <created id="3"/>
-    <created id="4"/>
+    <created sym="NJUPT" id="2"/>
+    <error id="3">account id has existed</error>
+    <created sym="Duke" id="2"/>
     <error id="1">account id has existed</error>
-    <created sym="A" id="1"/>
-    <created sym="A" id="1"/>
-    <created sym="A" id="2"/>
-    <error sym="A" id="5">account id doesn't exist</error>
-    <created sym="A" id="1"/>
-    <created sym="B" id="2"/>
-    <created sym="B" id="3"/>
-    <created sym="C" id="1"/>
-    <created sym="A" id="4"/>
-    <created sym="B" id="4"/>
+    <created sym="Duke" id="2"/>
 </results>

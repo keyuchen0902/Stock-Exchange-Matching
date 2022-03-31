@@ -5,11 +5,15 @@
 #include <mutex>
 #include "database.h"
 #include "tinyxml2.h"
-
+#include <mutex>
 using namespace std;
 using namespace pqxx;
 using namespace tinyxml2;
-
+/*
+extern mutex account_mtx;
+extern mutex pos_mtx;
+extern mutex trans_mtx;
+extern mutex exec_mtx;*/
 extern std::mutex mymutex;
 
 class MyDB{
@@ -34,7 +38,7 @@ static int addTransaction(connection * C,const string & account_id,const string 
 class MyLock
 {
  private:
-  std::mutex * mtx;
+std::mutex * mtx;
 
  public:
   explicit MyLock(std::mutex * temp) {
@@ -44,7 +48,6 @@ class MyLock
 
   ~MyLock() { mtx->unlock(); }
 };
-
 
 
 

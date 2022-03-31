@@ -17,6 +17,7 @@ long getCurrTime()
 /* Add a new entry to the table, return true if succeed */
 bool MyDB::addAccount(connection *C, string &account_id, double balance)
 {
+    //account_mtx.lock();
     work W(*C);
     std::stringstream sql;
     sql << "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) ";
@@ -32,8 +33,10 @@ bool MyDB::addAccount(connection *C, string &account_id, double balance)
     catch (const std::exception &e)
     {
         W.abort();
+        //account_mtx.lock();
         return false;
     }
+    //account_mtx.lock();
 
     return true;
 }
@@ -108,6 +111,8 @@ void MyDB::addPosition(connection *C,
                            string &account_id,
                            int num_share)
 {
+    //pos_mtx.lock();
+    //account_mtx.lock();
     work W(*C);
     std::stringstream sql;
     sql << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
@@ -121,6 +126,8 @@ void MyDB::addPosition(connection *C,
 
     W.exec(sql.str());
     W.commit();
+    //pos_mtx.unlock();
+    //account_mtx.unlock();
 }
 
 bool MyDB::updateSymbolAmount(connection *C, string &symbol_name, string &account_id, int amount)
@@ -170,6 +177,7 @@ int MyDB::addTransaction(connection *C,
                                 double limited,
                                 int num_open)
 {
+    //trans_mtx.lock();
     work W(*C);
     std::stringstream sql;
     sql << "Insert INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SYMBOL_NAME, "
@@ -367,7 +375,6 @@ void MyDB::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLE
     result R(W1.exec(sql1.str()));
 
     int num_open = R[0]["NUM_OPEN"].as<int>();
-    cout << num_open <<endl;
     if (num_open == 0)
     {
         W1.commit();
@@ -377,7 +384,7 @@ void MyDB::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLE
         usernode->InsertEndChild(node1);
         return;
     }
-    cout << "enter here1" << endl;
+    
 
     /* Create SQL statement */
     std::stringstream sql2;
@@ -391,15 +398,13 @@ void MyDB::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLE
     W1.exec(sql2);
     W1.commit();
 
-    cout << "enter here2" << endl;
     /* Get the account_id of the given trans_id */
     string account_id = getAccountID(C, trans_id);
-    cout << "enter here3" << endl;
+   
     if (num_open > 0)
     { // buyer,need to return money
-        cout << "enter here4" << endl;
         double limiited = MyDB::getLimited(C, trans_id);
-        cout << "enter here5" << endl;
+    
         work W2(*C);
         std::stringstream sql3;
         sql3 << "SELECT BALANCE FROM ACCOUNT WHERE ACCOUNT_ID = ";
@@ -447,6 +452,7 @@ void MyDB::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLE
 bool MyDB::matchOrder(connection *C, int trans_id)
 {
     MyLock lk(&mymutex);
+
     work W(*C);
 
     // Lock all rows related to current transaction's owner

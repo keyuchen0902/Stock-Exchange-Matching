@@ -1,5 +1,10 @@
 #include "functions.h"
-
+/*
+mutex account_mtx;
+mutex pos_mtx;
+mutex trans_mtx;
+mutex exec_mtx;*/
+//std::mutex mymutex;
 void handleRequest(int client_fd)
 {
     connection *C;
@@ -60,7 +65,9 @@ void handleRequest(int client_fd)
     response->Print(&printer);   //将Print打印到Xmlprint类中 即保存在内存中
     string buf = printer.CStr(); //转换成const char*类型
 
-    send(client_fd, buf.c_str(), buf.length(), 0);
+    string ans = to_string(buf.size()) + "\n" + buf;
+
+    send(client_fd, ans.c_str(), ans.length(), 0);
     // Close database connection
     C->disconnect();
     delete C;
@@ -200,11 +207,13 @@ XMLDocument *handleCreat(connection *C, string &request)
     }
     //是否要save 怎么save 似乎需要一个文件路径
     response->SaveFile("test.xml");
+
     // XML 写到字符串
     XMLPrinter printer;
     response->Print(&printer);   //将Print打印到Xmlprint类中 即保存在内存中
     string buf = printer.CStr(); //转换成const char*类型
-    cout << buf << endl;         // buf即为创建后的XML 字符串。
+    string ans = to_string(buf.size()) + "\n" + buf;
+    cout << ans << endl;         // buf即为创建后的XML 字符串。
     return response;
 }
 void getTransError(XMLDocument *response, XMLElement *root, string sym, string amount, string limit, string msg)
@@ -257,6 +266,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
     {
         if (strncmp(currElem->Name(), "order", 5) == 0)
         {
+        
             string sym = currElem->FirstAttribute()->Value();
             string amount = currElem->FindAttribute("amount")->Value();
             string limit = currElem->FindAttribute("limit")->Value();
@@ -305,7 +315,9 @@ XMLDocument *handleTranscation(connection *C, string &request)
                 usernode->SetAttribute("limit", limit.c_str());
                 usernode->SetAttribute("id", id_trans);
                 root->InsertEndChild(usernode);
+
             }
+            
         }
         else if (strncmp(currElem->Name(), "cancel", 6) == 0)
         {
@@ -325,6 +337,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
                 MyDB::handleCancel(C, stoi(trans_id), response, usernode); // Q内存问题 对response进行修改
                 root->InsertEndChild(usernode);
             }
+            
         }
         else if (strcmp(currElem->Name(), "query") == 0)
         {
@@ -352,6 +365,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
     XMLPrinter printer;
     response->Print(&printer);   //将Print打印到Xmlprint类中 即保存在内存中
     string buf = printer.CStr(); //转换成const char*类型
-    cout << buf << endl;         // buf即为创建后的XML 字符串。
+    string ans = to_string(buf.size()) + "\n" + buf;
+    cout << ans << endl;         // buf即为创建后的XML 字符串。
     return response;
 }
