@@ -1,0 +1,9 @@
+<results>
+    <error sym="A" amount="-5000" limit="100">symbol amount is not enough</error>
+    <opened sym="A" amount="-500" limit="100" id="8"/>
+    <error sym="B" amount="500" limit="100">account balance is not enough</error>
+    <opened sym="B" amount="5" limit="100" id="9"/>
+    <opened sym="C" amount="-10" limit="50" id="10"/>
+    <error sym="B" amount="-200000" limit="20000">symbol amount is not enough</error>
+    <error sym="D" amount="20" limit="2000">account balance is not enough</error>
+</results>

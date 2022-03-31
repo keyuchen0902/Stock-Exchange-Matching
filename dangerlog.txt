@@ -1,0 +1,1 @@
+Having drawbacks in realizing the multi-thread. Maybe need using thread pool in server client.
