@@ -1,2 +1,3 @@
 Having drawbacks in realizing the multi-thread. Maybe need using thread pool in server client.
 Having drouble with scalability test. The performance did not improve obviously as the number of cores goes up.
+Failed to setting up docker. Testers have to change the infomation of database.
