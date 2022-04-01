@@ -1,5 +1,28 @@
 <results>
-    <canceled id="1">
+    <status id="7">
+        <executed shares="8" price="50" time="1648767123"/>
+        <executed shares="92" price="100" time="1648767123"/>
+    </status>
+    <status id="6">
+        <executed shares="10" price="50" time="1648767104"/>
+    </status>
+    <status id="1">
+        <open shares="-408"/>
+        <executed shares="-92" price="100" time="1648767123"/>
+    </status>
+    <status id="2">
+        <executed shares="5" price="100" time="1648767123"/>
+    </status>
+    <canceled id="8">
+        <canceled shares="-15" time="1648767141"/>
+        <executed shares="-5" price="100" time="1648767123"/>
+        <executed shares="-10" price="100" time="1648767123"/>
+    </canceled>
+    <canceled id="7">
         <error>the num of open share is 0. Cannot be canceled</error>
+    </canceled>
+    <canceled id="1">
+        <canceled shares="-408" time="1648767141"/>
+        <executed shares="-92" price="100" time="1648767123"/>
     </canceled>
 </results>

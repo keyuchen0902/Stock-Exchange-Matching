@@ -7,7 +7,6 @@
 #include <iostream>
 #include <string>
 
-
 using namespace std;
 
 int main(int argc, char * argv[]) {
@@ -15,13 +14,14 @@ int main(int argc, char * argv[]) {
   int socket_fd;
   struct addrinfo host_info;
   struct addrinfo * host_info_list;
-  const char * hostname = "vcm-25974.vm.duke.edu";
+  //const char * hostname = "vcm-25974.vm.duke.edu";
+  const char * hostname = "vcm-25417.vm.duke.edu";
   const char * port = "12345";
   char buffer[5120];
   char response[5120];
 
   if (argc < 2) {
-    cout << "Syntax: client <fileName>\n" << endl;
+    cout << "Syntax: client <fileName>" << endl;
     return 1;
   }
 
@@ -33,27 +33,26 @@ int main(int argc, char * argv[]) {
   if (status != 0) {
     cerr << "Error: cannot get address info for host" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
+    exit(EXIT_FAILURE);
   }  //if
 
-  socket_fd =
-      socket(host_info_list->ai_family, host_info_list->ai_socktype, host_info_list->ai_protocol);
+  socket_fd = socket(host_info_list->ai_family,
+                     host_info_list->ai_socktype,
+                     host_info_list->ai_protocol);
   if (socket_fd == -1) {
     cerr << "Error: cannot create socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
+    exit(EXIT_FAILURE);
   }  //if
-
-  // cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
 
   status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1) {
     cerr << "Error: cannot connect to socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
-    return -1;
+    exit(EXIT_FAILURE);
   }  //if
 
-  memset(&buffer, '\0', sizeof(buffer));
+  // memset(&buffer, '\0', sizeof(buffer));
   std::ifstream ifs(argv[1]);
   std::string str;
   std::string line;

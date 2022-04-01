@@ -9,13 +9,11 @@
 using std::string;
 using namespace pqxx;
 
-class Database
-{
-public:
+class Database {
+ public:
   /* Create table in the database connected by W
      If it already exists, delete it first */
-  static void createTable(connection *C)
-  {
+  static void createTable(connection * C) {
     /* Create a transactional object. */
     string dropAccount = "DROP TABLE IF EXISTS ACCOUNT CASCADE;";
 
@@ -24,11 +22,12 @@ public:
                                 "BALANCE         REAL    NOT NULL);";
     string dropPosition = "DROP TABLE IF EXISTS POSITION CASCADE;";
 
-    string createTablePosition = "CREATE TABLE POSITION ("
-                                 "SYMBOL_NAME     TEXT    NOT NULL, "
-                                 "ACCOUNT_ID      TEXT    NOT NULL, "
-                                 "NUM_SHARE       INT     NOT NULL, "
-                                 "CONSTRAINT POSITION_PKEY PRIMARY KEY (SYMBOL_NAME, ACCOUNT_ID));";
+    string createTablePosition =
+        "CREATE TABLE POSITION ("
+        "SYMBOL_NAME     TEXT    NOT NULL, "
+        "ACCOUNT_ID      TEXT    NOT NULL, "
+        "NUM_SHARE       INT     NOT NULL, "
+        "CONSTRAINT POSITION_PKEY PRIMARY KEY (SYMBOL_NAME, ACCOUNT_ID));";
 
     string dropTransaction = "DROP TABLE IF EXISTS TRANSACTION CASCADE;";
 
@@ -52,20 +51,23 @@ public:
                                   "PRICE           REAL    NOT NULL, "
                                   "TIME            BIGINT  NOT NULL);";
 
-    string buildForeignKeysPosition = "ALTER TABLE POSITION "
-                                      "ADD CONSTRAINT POSITION_ACCOUNT_ID_FKEY FOREIGN KEY "
-                                      "(ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID);";
+    string buildForeignKeysPosition =
+        "ALTER TABLE POSITION "
+        "ADD CONSTRAINT POSITION_ACCOUNT_ID_FKEY FOREIGN KEY "
+        "(ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID);";
 
-    string buildForeignKeysTranscation = "ALTER TABLE TRANSACTION "
-                                         "ADD CONSTRAINT TRANSACTION_ACCOUNT_ID_FKEY FOREIGN KEY "
-                                         "(ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID);";
+    string buildForeignKeysTranscation =
+        "ALTER TABLE TRANSACTION "
+        "ADD CONSTRAINT TRANSACTION_ACCOUNT_ID_FKEY FOREIGN KEY "
+        "(ACCOUNT_ID) REFERENCES ACCOUNT(ACCOUNT_ID);";
 
-    string buildForeignKeysExecution = "ALTER TABLE EXECUTION "
-                                       "ADD CONSTRAINT EXECUTION_TRANSACTION_ID_FKEY_1 FOREIGN KEY "
-                                       "(BUYER_TRANS_ID) REFERENCES TRANSACTION(TRANSACTION_ID); "
-                                       "ALTER TABLE EXECUTION "
-                                       "ADD CONSTRAINT EXECUTION_TRANSACTION_ID_FKEY_2 FOREIGN KEY "
-                                       "(SELLER_TRANS_ID) REFERENCES TRANSACTION(TRANSACTION_ID);";
+    string buildForeignKeysExecution =
+        "ALTER TABLE EXECUTION "
+        "ADD CONSTRAINT EXECUTION_TRANSACTION_ID_FKEY_1 FOREIGN KEY "
+        "(BUYER_TRANS_ID) REFERENCES TRANSACTION(TRANSACTION_ID); "
+        "ALTER TABLE EXECUTION "
+        "ADD CONSTRAINT EXECUTION_TRANSACTION_ID_FKEY_2 FOREIGN KEY "
+        "(SELLER_TRANS_ID) REFERENCES TRANSACTION(TRANSACTION_ID);";
 
     work W(*C);
 
