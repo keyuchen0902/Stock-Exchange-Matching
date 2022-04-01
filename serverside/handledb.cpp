@@ -18,6 +18,7 @@ long getCurrTime()
 bool MyDB::addAccount(connection *C, string &account_id, double balance)
 {
     //account_mtx.lock();
+
     work W(*C);
     std::stringstream sql;
     sql << "INSERT INTO ACCOUNT (ACCOUNT_ID, BALANCE) ";
@@ -93,6 +94,7 @@ void MyDB::addExecution(work &W,
                              int amount,
                              double price)
 {
+
     std::stringstream sql;
     sql << "Insert INTO EXECUTION (EXECUTION_ID, BUYER_TRANS_ID, SELLER_TRANS_ID, ";
     sql << "AMOUNT, PRICE, TIME) ";
@@ -113,6 +115,7 @@ void MyDB::addPosition(connection *C,
 {
     //pos_mtx.lock();
     //account_mtx.lock();
+
     work W(*C);
     std::stringstream sql;
     sql << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
@@ -178,6 +181,7 @@ int MyDB::addTransaction(connection *C,
                                 int num_open)
 {
     //trans_mtx.lock();
+
     work W(*C);
     std::stringstream sql;
     sql << "Insert INTO TRANSACTION (TRANSACTION_ID, ACCOUNT_ID, SYMBOL_NAME, "
@@ -233,7 +237,7 @@ void MyDB::handleQuery(connection *C, int trans_id, XMLDocument *response, XMLEl
     sql1 << "WHERE TRANSACTION.TRANSACTION_ID = " << W.quote(trans_id);
     sql1 << " AND (EXECUTION.BUYER_TRANS_ID = " << W.quote(trans_id);
     sql1 << " OR EXECUTION.SELLER_TRANS_ID = " << W.quote(trans_id);
-    sql1 << ") FOR UPDATE;";
+    sql1 << ") FOR UPDATE;"; 
     W.exec(sql1.str());
 
     // Get open and canceled shares
@@ -451,7 +455,7 @@ void MyDB::handleCancel(connection *C, int trans_id, XMLDocument *response, XMLE
 
 bool MyDB::matchOrder(connection *C, int trans_id)
 {
-    MyLock lk(&mymutex);
+    MyLock lk(&mymutex);//change
 
     work W(*C);
 
@@ -566,7 +570,9 @@ bool MyDB::matchOrder(connection *C, int trans_id)
         W.exec(sql.str());
 
         // give symbol to buyer ???实现未成功
+   
         std::stringstream sql3;
+        
         sql3 << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
         sql3 << "VALUES (";
         sql3 << W.quote(symbol_name) << ", ";
@@ -624,6 +630,7 @@ bool MyDB::matchOrder(connection *C, int trans_id)
             sql2 << W.quote(other_trans_id) << ";";
             W.exec(sql2.str());
         } // give symbol to buyer
+ 
         std::stringstream sql3;
         sql3 << "Insert INTO POSITION (SYMBOL_NAME, ACCOUNT_ID, NUM_SHARE) ";
         sql3 << "VALUES (";

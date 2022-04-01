@@ -206,7 +206,7 @@ XMLDocument *handleCreat(connection *C, string &request)
         currElem = currElem->NextSiblingElement();
     }
     //是否要save 怎么save 似乎需要一个文件路径
-    response->SaveFile("test.xml");
+    //response->SaveFile("test.xml");
 
     // XML 写到字符串
     XMLPrinter printer;
@@ -241,7 +241,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
     if (MyDB::idExists(C, id) == false || !checkDigits(id))
     {
         getAccountError(response, root, id, "account id doesn't exist");
-        response->SaveFile("test1.xml");
+        //response->SaveFile("test1.xml");
         // XML 写到字符串
         XMLPrinter printer;
         response->Print(&printer);   //将Print打印到Xmlprint类中 即保存在内存中
@@ -252,7 +252,7 @@ XMLDocument *handleTranscation(connection *C, string &request)
     else if (!checkDigits(id))
     {
         getAccountError(response, root, id, "id format is wrong");
-        response->SaveFile("test1.xml");
+        //response->SaveFile("test1.xml");
         // XML 写到字符串
         XMLPrinter printer;
         response->Print(&printer);   //将Print打印到Xmlprint类中 即保存在内存中
