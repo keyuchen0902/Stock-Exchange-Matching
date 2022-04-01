@@ -1,9 +1,6 @@
 <results>
-    <opened sym="A" amount="-5000" limit="100" id="2"/>
-    <opened sym="A" amount="-500" limit="100" id="4"/>
-    <error sym="B" amount="500" limit="100">account balance is not enough</error>
-    <opened sym="B" amount="5" limit="100" id="6"/>
-    <opened sym="C" amount="-10" limit="50" id="7"/>
-    <error sym="B" amount="-200000" limit="20000">symbol amount is not enough</error>
-    <error sym="D" amount="20" limit="2000">account balance is not enough</error>
+    <status id="1">
+        <canceled shares="0" time="1648824938"/>
+        <executed shares="-92" price="100" time="1648824916"/>
+    </status>
 </results>

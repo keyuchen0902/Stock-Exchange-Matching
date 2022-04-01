@@ -260,7 +260,7 @@ void MyDB::handleQuery(connection *C, int trans_id, XMLDocument *response, XMLEl
     if (canceledShares != 0)
     {
         XMLElement *node2 = response->NewElement("canceled");
-        node2->SetAttribute("shares", openShares);
+        node2->SetAttribute("shares", canceledShares);
         node2->SetAttribute("time", canceledTime);
         usernode->InsertEndChild(node2);
     }
