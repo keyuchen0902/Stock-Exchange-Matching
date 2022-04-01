@@ -17,33 +17,34 @@
 using namespace std;
 using namespace std::chrono;
 
-#define SERVERNAME "vcm-25974.vm.duke.edu"
+//#define SERVERNAME "vcm-25974.vm.duke.edu"
+#define SERVERNAME "vcm-25417.vm.duke.edu"
 #define PORT "12345"
 
 void sendRequest(int curt, int all);
 
-string account(const char *id, int balance);
+string account(const char * id, int balance);
 
-string symbol(const char *name, const char *id, int num);
+string symbol(const char * name, const char * id, int num);
 
 string create();
 
 string transactions();
 
-string order(const char *name, int amount, int limit);
+string order(const char * name, int amount, int limit);
 
 string query(int trans_id);
 
 string cancel(int trans_id);
 
-const char *account_ids[5] = {"1", "2", "3", "4", "5"};
-const char *items[5] = {"Duke", "UNC", "USC", "MIT", "NJUPT"};
+const char * account_ids[5] = {"1", "2", "3", "4", "5"};
+const char * items[5] = {"Duke", "UNC", "USC", "MIT", "NJUPT"};
 
 // start time && end time
 high_resolution_clock::time_point starttime;
 high_resolution_clock::time_point endtime;
 
-int main(int argc, char **argv) {
+int main(int argc, char ** argv) {
   if (argc == 1)
     return 0;
 
@@ -55,20 +56,19 @@ int main(int argc, char **argv) {
   cout << times << " threads.\n";
 
   std::vector<std::thread> threads;
-  
+
   // get start time
   starttime = high_resolution_clock::now();
   for (int i = 0; i < times; i++) {
     threads.push_back(std::thread(sendRequest, i, times));
   }
 
-
-
   try {
     for (int i = 0; i < times; i++) {
       threads[i].detach();
     }
-  } catch (std::exception &e) {
+  }
+  catch (std::exception & e) {
     // General catch exception to return 404, rarely gets here though
     // Because we have other try & catch in handlehttp
     std::cout << e.what() << std::endl;
@@ -85,26 +85,27 @@ void sendRequest(int curt, int all) {
   string request;
 
   /* initialize random num: */
-  std::random_device rd;  // obtain a random number from hardware
-  std::mt19937 eng(rd()); // seed the generator
-  std::uniform_int_distribution<> distr(1, 10); // define the range
+  std::random_device rd;                         // obtain a random number from hardware
+  std::mt19937 eng(rd());                        // seed the generator
+  std::uniform_int_distribution<> distr(1, 10);  // define the range
 
   /* generate secret number between 1 and 10: */
   int iSecret = distr(eng);
 
   // <= 3
-  if (iSecret <= 10) { // create
+  if (iSecret <= 10) {  // create
     request = create();
-  } else { // transaction
+  }
+  else {  // transaction
     request = transactions();
   }
 
   int status;
   int socket_fd;
   struct addrinfo host_info;
-  struct addrinfo *host_info_list;
-  const char *hostname = SERVERNAME;
-  const char *port = PORT;
+  struct addrinfo * host_info_list;
+  const char * hostname = SERVERNAME;
+  const char * port = PORT;
 
   memset(&host_info, 0, sizeof(host_info));
   host_info.ai_family = AF_UNSPEC;
@@ -115,25 +116,25 @@ void sendRequest(int curt, int all) {
     cerr << "Error: cannot get address info for host" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
     return;
-  } // if
+  }  // if
 
-  socket_fd = socket(host_info_list->ai_family, host_info_list->ai_socktype,
+  socket_fd = socket(host_info_list->ai_family,
+                     host_info_list->ai_socktype,
                      host_info_list->ai_protocol);
   if (socket_fd == -1) {
     cerr << "Error: cannot create socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
     return;
-  } // if
+  }  // if
 
   cout << "Connecting to " << hostname << " on port " << port << "..." << endl;
 
-  status =
-      connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
+  status = connect(socket_fd, host_info_list->ai_addr, host_info_list->ai_addrlen);
   if (status == -1) {
     cerr << "Error: cannot connect to socket" << endl;
     cerr << "  (" << hostname << "," << port << ")" << endl;
     return;
-  } // if
+  }  // if
 
   string finalreq = std::to_string(request.size()) + "\n" + request;
 
@@ -150,8 +151,7 @@ void sendRequest(int curt, int all) {
   if (curt == all - 1) {
     // get finish time
     endtime = high_resolution_clock::now();
-    duration<double> time_span =
-        duration_cast<duration<double>>(endtime - starttime);
+    duration<double> time_span = duration_cast<duration<double> >(endtime - starttime);
     cout << "\nWith " << all << " threads sending requests concurrently, ";
     cout << "it takes " << time_span.count() << " seconds to finish.\n";
   }
@@ -166,9 +166,9 @@ string create() {
 
   for (int i = 0; i < 5; i++) {
     /* initialize random seed: */
-    std::random_device rd;  // obtain a random number from hardware
-    std::mt19937 eng(rd()); // seed the generator
-    std::uniform_int_distribution<> distr(1, 10000000); // define the range
+    std::random_device rd;   // obtain a random number from hardware
+    std::mt19937 eng(rd());  // seed the generator
+    std::uniform_int_distribution<> distr(1, 10000000);  // define the range
 
     /* generate secret number between 1 and 10: */
     int option = distr(eng) % 10 + 1;
@@ -176,12 +176,13 @@ string create() {
     int balance = distr(eng);
 
     // <= 5
-    if (option <= 4) { // create
+    if (option <= 4) {  // create
       // % 5
       int id = distr(eng) % 3;
 
       ss << account(account_ids[id], balance);
-    } else { // transaction
+    }
+    else {  // transaction
       int name = distr(eng) % 5;
       // % 5
       int id = distr(eng) % 3;
@@ -200,9 +201,9 @@ string transactions() {
   ss << "<transactions id=\"";
 
   /* initialize random seed: */
-  std::random_device rd;  // obtain a random number from hardware
-  std::mt19937 eng(rd()); // seed the generator
-  std::uniform_int_distribution<> distr(1, 100000); // define the range
+  std::random_device rd;   // obtain a random number from hardware
+  std::mt19937 eng(rd());  // seed the generator
+  std::uniform_int_distribution<> distr(1, 100000);  // define the range
 
   ss << distr(eng) % 5 << "\">\n";
 
@@ -210,7 +211,7 @@ string transactions() {
     /* generate secret number between 1 and 12: */
     int option = distr(eng) % 12 + 1;
 
-    if (option <= 7) { // order
+    if (option <= 7) {  // order
       int sym = distr(eng) % 5;
       int amount = distr(eng) % 33;
       if (distr(eng) % 10 % 2 == 0)
@@ -218,11 +219,13 @@ string transactions() {
       int limit = distr(eng) % 100;
 
       ss << order(items[sym], amount, limit);
-    } else if (option >= 8 && option <= 10) { // query
+    }
+    else if (option >= 8 && option <= 10) {  // query
       int trans_id = distr(eng) % 500 + 1;
 
       ss << query(trans_id);
-    } else { // cancel
+    }
+    else {  // cancel
       int trans_id = distr(eng) % 500 + 1;
 
       ss << cancel(trans_id);
@@ -233,7 +236,7 @@ string transactions() {
   return ss.str();
 }
 
-string account(const char *id, int balance) {
+string account(const char * id, int balance) {
   stringstream ss;
   ss << "  <account id=\"";
   ss << id << "\" balance=\"";
@@ -241,7 +244,7 @@ string account(const char *id, int balance) {
   return ss.str();
 }
 
-string symbol(const char *name, const char *id, int num) {
+string symbol(const char * name, const char * id, int num) {
   stringstream ss;
   ss << "  <symbol sym=\"";
   ss << name << "\">\n";
@@ -252,7 +255,7 @@ string symbol(const char *name, const char *id, int num) {
   return ss.str();
 }
 
-string order(const char *name, int amount, int limit) {
+string order(const char * name, int amount, int limit) {
   stringstream ss;
   ss << "  <order sym=\"";
   ss << name << "\" amount=\"";
@@ -273,4 +276,4 @@ string cancel(int trans_id) {
   ss << "  <cancel id=\"";
   ss << trans_id << "\"/>\n";
   return ss.str();
-} 
+}
