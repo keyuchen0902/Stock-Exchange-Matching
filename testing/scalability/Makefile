@@ -1,4 +1,13 @@
+CC=g++
+CFLAGs=-03
+EXTRAFLAGS=-pthread
+
+.Phony: all clean
+
 all: client
 
 client: client.cpp
-	g++ -O3 -std=c++11 -pthread -lboost_thread -lboost_system -o client client.cpp
+	$(CC) $(CFLAGS) -o client client.cpp $(EXTRAFLAGS)
+
+clean:
+	rm -f client *~
